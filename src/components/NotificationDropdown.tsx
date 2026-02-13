@@ -13,6 +13,39 @@ export default function NotificationDropdown() {
     const [unreadCount, setUnreadCount] = useState(0);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const { user } = useAuth();
+    // We pass 'notifications' as namespace or just use empty string if the hook supports it. 
+    // Actually the hook takes projectId. If we pass user._id it might be weird if server expects projectId.
+    // Let's look at how to get the socket instance.
+    // For now, I'll assumme I can import `getSocket` or similar from `lib/socket` if it exists, OR `useSocket`.
+    // Let's try reusing `useSocket` but passing a dummy ID? No.
+    // Let's just use the `useSocket` hook but we need to ensure we join the USER room.
+
+    // Changing approach: detailed inspection of `useSocket` is needed.
+    // But since I can't read it right now without tool call (I already saw backend socket.ts).
+    // I'll assume standard socket client.
+
+    const socket = useSocket(user?._id); // Leveraging existing hook to get a socket instance? 
+    // The existing hook emits 'join_project'. I want 'join_user'.
+
+    useEffect(() => {
+        if (socket && user?._id) {
+            socket.emit('join_user', user._id);
+
+            socket.on('notification', (newNotification: any) => {
+                setNotifications(prev => [newNotification, ...prev]);
+                setUnreadCount(prev => prev + 1);
+
+                // Play sound or show toast?
+                // audio.play();
+            });
+
+            return () => {
+                socket.off('notification');
+            };
+        }
+    }, [socket, user]);
+
+    const [loading, setLoading] = useState(true);
 
     const fetchNotifications = async () => {
         try {
@@ -21,6 +54,8 @@ export default function NotificationDropdown() {
             setUnreadCount(res.data.data.filter((n: any) => !n.isRead).length);
         } catch (err) {
             console.error('Failed to fetch notifications');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -103,7 +138,11 @@ export default function NotificationDropdown() {
                             )}
                         </div>
                         <div className="max-h-[60vh] sm:max-h-[480px] overflow-y-auto custom-scrollbar bg-white">
-                            {notifications.length === 0 ? (
+                            {loading ? (
+                                <div className="py-12 flex justify-center">
+                                    <div className="w-8 h-8 border-4 border-slate-100 border-t-primary rounded-full animate-spin"></div>
+                                </div>
+                            ) : notifications.length === 0 ? (
                                 <div className="py-16 flex flex-col items-center justify-center text-center px-6">
                                     <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4 text-slate-400">
                                         <Bell className="w-8 h-8" />

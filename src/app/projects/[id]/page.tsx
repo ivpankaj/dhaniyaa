@@ -22,6 +22,7 @@ export default function ProjectBoardPage() {
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [selectedTicket, setSelectedTicket] = useState<any>(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
 
     useEffect(() => {
@@ -180,6 +181,8 @@ export default function ProjectBoardPage() {
                             <input
                                 type="text"
                                 placeholder="Search board..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
                                 className="bg-white border border-border px-10 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 w-full sm:w-64 shadow-sm"
                             />
                             <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,6 +207,7 @@ export default function ProjectBoardPage() {
                         projectId={params.id}
                         sprintId={selectedSprintId}
                         onTicketClick={(ticket) => setSelectedTicket(ticket)}
+                        searchQuery={searchQuery}
                     />
                 ) : (
                     <div className="h-full mx-4 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-300 rounded-2xl bg-white/50 mb-4">

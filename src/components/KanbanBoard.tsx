@@ -21,14 +21,16 @@ const columns = {
     'Done': { title: 'Done', items: [] as Ticket[] },
 };
 
-export default function KanbanBoard({ projectId, sprintId, onTicketClick }: { projectId: string; sprintId?: string | null; onTicketClick: (ticket: any) => void }) {
+export default function KanbanBoard({ projectId, sprintId, onTicketClick, searchQuery }: { projectId: string; sprintId?: string | null; onTicketClick: (ticket: any) => void; searchQuery?: string }) {
     const [boardData, setBoardData] = useState(columns);
+    const [loading, setLoading] = useState(true);
     const socket = useSocket(projectId);
     const containerRef = useRef<HTMLDivElement>(null);
     const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const fetchTickets = async () => {
+            setLoading(true);
             try {
                 let url = `/api/tickets?projectId=${projectId}`;
                 if (sprintId) {
@@ -53,6 +55,8 @@ export default function KanbanBoard({ projectId, sprintId, onTicketClick }: { pr
                 setBoardData(newBoard);
             } catch (err) {
                 console.error('Failed to fetch tickets', err);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -213,10 +217,40 @@ export default function KanbanBoard({ projectId, sprintId, onTicketClick }: { pr
         }
     }
 
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full w-full gap-4">
+                <div className="w-12 h-12 border-4 border-slate-200 border-t-primary rounded-full animate-spin"></div>
+                <p className="text-slate-400 font-bold text-xs uppercase tracking-widest animate-pulse">Loading Board...</p>
+            </div>
+        );
+    }
+
+    // Filter board data for display
+    const getDisplayedBoard = () => {
+        if (!searchQuery?.trim()) return boardData;
+
+        const q = searchQuery.toLowerCase();
+        const newBoard = JSON.parse(JSON.stringify(boardData));
+
+        Object.keys(newBoard).forEach(key => {
+            newBoard[key].items = newBoard[key].items.filter((item: Ticket) =>
+                item.title.toLowerCase().includes(q) ||
+                item._id.toLowerCase().includes(q) ||
+                item.assignee?.name.toLowerCase().includes(q)
+            );
+        });
+
+        return newBoard;
+    };
+
+    const displayedBoard = getDisplayedBoard();
+    const isDragDisabled = !!searchQuery?.trim();
+
     return (
         <div ref={containerRef} className="flex h-full overflow-x-auto p-3 md:p-6 gap-4 md:gap-6 select-none custom-scrollbar pb-10 bg-slate-50/20">
             <DragDropContext onDragEnd={onDragEnd} onDragStart={handleDragStart} onDragUpdate={handleDragUpdate}>
-                {Object.entries(boardData).map(([columnId, column]) => (
+                {Object.entries(displayedBoard).map(([columnId, column]: [string, any]) => (
                     <div key={columnId} className="flex flex-col w-[280px] sm:w-[320px] bg-white rounded-2xl md:rounded-3xl p-4 md:p-5 shrink-0 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 h-full max-h-full">
                         <div className="flex justify-between items-center mb-6 px-1">
                             <h3 className="text-[12px] font-black tracking-[0.2em] uppercase text-slate-800 flex items-center gap-2">
@@ -229,7 +263,7 @@ export default function KanbanBoard({ projectId, sprintId, onTicketClick }: { pr
                             <span className="bg-slate-100/80 text-slate-500 px-2.5 py-1 rounded-xl text-[10px] font-black border border-slate-50">{column.items.length}</span>
                         </div>
 
-                        <Droppable droppableId={columnId}>
+                        <Droppable droppableId={columnId} isDropDisabled={isDragDisabled}>
                             {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
                                 <div
                                     {...provided.droppableProps}
@@ -237,8 +271,8 @@ export default function KanbanBoard({ projectId, sprintId, onTicketClick }: { pr
                                     className={`flex-1 space-y-3 p-1 rounded-2xl transition-colors duration-200 overflow-y-auto custom-scrollbar min-h-[150px] ${snapshot.isDraggingOver ? 'bg-blue-50/30 ring-2 ring-blue-200 ring-inset' : ''}`}
                                     style={{ minHeight: '200px' }}
                                 >
-                                    {column.items.map((ticket, index) => (
-                                        <Draggable key={ticket._id} draggableId={ticket._id} index={index}>
+                                    {column.items.map((ticket: Ticket, index: number) => (
+                                        <Draggable key={ticket._id} draggableId={ticket._id} index={index} isDragDisabled={isDragDisabled}>
                                             {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
                                                 <div
                                                     ref={provided.innerRef}
@@ -257,15 +291,17 @@ export default function KanbanBoard({ projectId, sprintId, onTicketClick }: { pr
                                                     <div className="flex items-start justify-between mb-3">
                                                         <p className="text-sm font-bold text-slate-800 leading-base flex-1">{ticket.title}</p>
                                                         {/* Drag handle */}
-                                                        <div
-                                                            {...provided.dragHandleProps}
-                                                            className="ml-2 p-1 hover:bg-slate-100 rounded cursor-grab active:cursor-grabbing shrink-0"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
-                                                            </svg>
-                                                        </div>
+                                                        {!isDragDisabled && (
+                                                            <div
+                                                                {...provided.dragHandleProps}
+                                                                className="ml-2 p-1 hover:bg-slate-100 rounded cursor-grab active:cursor-grabbing shrink-0"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                                                                </svg>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <div className="flex justify-between items-center bg-slate-50/50 p-2 rounded-xl border border-slate-100/50">
                                                         <div className="flex items-center gap-2">

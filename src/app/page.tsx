@@ -30,7 +30,13 @@ export default function Home() {
     return (
         <div className="min-h-screen mesh-gradient text-slate-100 selection:bg-emerald-500/30">
             {/* Navbar */}
-            <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled || isMenuOpen ? 'py-4 glass' : 'py-6 bg-transparent'}`}>
+            <nav
+                className={`fixed top-0 w-full z-50 transition-all duration-300 
+                    ${scrolled || isMenuOpen
+                        ? 'py-4 backdrop-blur-xl bg-slate-900/40'
+                        : 'py-6 bg-transparent'}`}
+            >
+
                 <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-3 group cursor-pointer">
                         <DhaniyaaLogo className="w-10 h-10 group-hover:scale-110 transition-transform duration-300" />
@@ -59,7 +65,14 @@ export default function Home() {
 
                 {/* Mobile Tablet View Drawer */}
                 {isMenuOpen && (
-                    <div className="md:hidden absolute top-full left-0 w-full glass border-t border-white/5 p-6 space-y-4 animate-in slide-in-from-top-4 duration-300 flex flex-col">
+                    <div
+                        className="md:hidden absolute top-full left-0 w-full border-t border-white/10 p-6 space-y-4 animate-in slide-in-from-top-4 duration-500 flex flex-col shadow-2xl z-50"
+                        style={{
+                            backgroundColor: 'rgba(15, 23, 42, 0.4)',
+                            backdropFilter: 'blur(40px) saturate(200%)',
+                            WebkitBackdropFilter: 'blur(40px) saturate(200%)'
+                        }}
+                    >
                         <a href="#features" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-slate-300 hover:text-white py-2">Features</a>
                         <a href="#workflow" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-slate-300 hover:text-white py-2">Workflow</a>
                         <div className="h-[1px] w-full bg-white/5"></div>

@@ -5,6 +5,7 @@ import api from '@/lib/api';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { UserAvatar } from './UserAvatar';
+import { ConfirmationModal } from './ConfirmationModal';
 
 interface ProjectSettingsModalProps {
     isOpen: boolean;
@@ -81,17 +82,37 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({ isOp
         }
     };
 
-    const handleRemoveMember = async (memberId: string) => {
-        if (!confirm('Are you sure you want to remove this member?')) return;
+    const [confirmationModal, setConfirmationModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        variant?: 'danger' | 'warning' | 'info';
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => { },
+    });
 
-        try {
-            await api.delete(`/api/projects/${projectId}/members/${memberId}`);
-            toast.success('Member removed successfully');
-            onUpdate?.();
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to remove member');
-        }
+    const handleRemoveMember = (memberId: string) => {
+        setConfirmationModal({
+            isOpen: true,
+            title: 'Remove Member',
+            message: 'Are you sure you want to remove this member?',
+            variant: 'danger',
+            onConfirm: async () => {
+                try {
+                    await api.delete(`/api/projects/${projectId}/members/${memberId}`);
+                    toast.success('Member removed successfully');
+                    onUpdate?.();
+                } catch (error: any) {
+                    toast.error(error.response?.data?.message || 'Failed to remove member');
+                }
+            }
+        });
     };
+
 
     const handleChangeRole = async (memberId: string, newRole: string) => {
         try {
@@ -406,6 +427,14 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({ isOp
                     </main>
                 </div>
             </div>
+            <ConfirmationModal
+                isOpen={confirmationModal.isOpen}
+                onClose={() => setConfirmationModal(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmationModal.onConfirm}
+                title={confirmationModal.title}
+                message={confirmationModal.message}
+                variant={confirmationModal.variant}
+            />
         </div>
     );
 };

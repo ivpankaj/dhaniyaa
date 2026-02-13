@@ -4,15 +4,20 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { useParams, useRouter } from 'next/navigation';
 import { format } from 'date-fns';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import CreateSprintModal from '@/components/CreateSprintModal';
 import TicketDetailModal from '@/components/TicketDetailModal';
 import SprintDetailModal from '@/components/SprintDetailModal';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
+import { useAuth } from '@/context/AuthContext';
+import { ConfirmationModal } from '@/components/ConfirmationModal';
+
 export default function BacklogPage() {
     const params = useParams<{ id: string }>();
     const router = useRouter();
+    const { user } = useAuth();
     const [project, setProject] = useState<any>(null);
     const [sprints, setSprints] = useState<any[]>([]);
     const [allTickets, setAllTickets] = useState<any[]>([]);
@@ -44,29 +49,77 @@ export default function BacklogPage() {
         if (params.id) fetchData();
     }, [params.id]);
 
+
+    const [confirmationModal, setConfirmationModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        variant?: 'danger' | 'warning' | 'info';
+        confirmText?: string;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => { },
+    });
+
     const handleSprintCreated = (newSprint: any) => {
         setSprints([...sprints, newSprint]);
     };
 
-    const handleDragStart = (e: React.DragEvent, ticketId: string) => {
-        e.dataTransfer.setData('ticketId', ticketId);
+    const handleDeleteSprint = (sprintId: string) => {
+        setConfirmationModal({
+            isOpen: true,
+            title: 'Delete Sprint',
+            message: 'Are you sure you want to delete this sprint? Tickets will be moved to the backlog.',
+            variant: 'danger',
+            onConfirm: async () => {
+                try {
+                    await api.delete(`/api/sprints/${sprintId}`);
+                    toast.success('Sprint deleted successfully');
+                    fetchData();
+                } catch (err: any) {
+                    toast.error(err.response?.data?.message || 'Failed to delete sprint');
+                }
+            }
+        });
     };
 
-    const handleDrop = async (e: React.DragEvent, sprintId: string | null) => {
-        e.preventDefault();
-        const ticketId = e.dataTransfer.getData('ticketId');
+
+    const onDragEnd = async (result: DropResult) => {
+        const { destination, source, draggableId } = result;
+
+        if (!destination) return;
+
+        if (
+            destination.droppableId === source.droppableId &&
+            destination.index === source.index
+        ) {
+            return;
+        }
+
+        const sprintId = destination.droppableId === 'BACKLOG' ? null : destination.droppableId;
+
+        // Optimistic update
+        const movedTicket = allTickets.find(t => t._id === draggableId);
+        if (movedTicket) {
+            const updatedTickets = allTickets.map(t =>
+                t._id === draggableId ? { ...t, sprintId } : t
+            );
+            setAllTickets(updatedTickets);
+        }
 
         try {
-            await api.patch(`/api/tickets/${ticketId}`, { sprintId });
-            fetchData();
+            await api.patch(`/api/tickets/${draggableId}`, { sprintId });
             toast.success('Ticket moved successfully');
+            // Background refresh to ensure consistency
+            fetchData();
         } catch (err) {
             toast.error('Failed to move ticket');
+            // Revert on failure (or just re-fetch)
+            fetchData();
         }
-    };
-
-    const allowDrop = (e: React.DragEvent) => {
-        e.preventDefault();
     };
 
     const handleStartSprint = async (sprintId: string) => {
@@ -79,16 +132,25 @@ export default function BacklogPage() {
         }
     };
 
-    const handleCompleteSprint = async (sprintId: string) => {
-        if (!confirm('Are you sure you want to complete this sprint? Incomplete tickets will be moved to the backlog.')) return;
-        try {
-            await api.patch(`/api/sprints/${sprintId}/complete`);
-            fetchData();
-            toast.success('Sprint completed!');
-        } catch (err) {
-            toast.error('Failed to complete sprint');
-        }
+    const handleCompleteSprint = (sprintId: string) => {
+        setConfirmationModal({
+            isOpen: true,
+            title: 'Complete Sprint',
+            message: 'Are you sure you want to complete this sprint? Incomplete tickets will be moved to the backlog.',
+            variant: 'warning',
+            confirmText: 'Complete',
+            onConfirm: async () => {
+                try {
+                    await api.patch(`/api/sprints/${sprintId}/complete`);
+                    fetchData();
+                    toast.success('Sprint completed!');
+                } catch (err) {
+                    toast.error('Failed to complete sprint');
+                }
+            }
+        });
     };
+
 
     const backlogTickets = allTickets.filter(t => !t.sprintId);
 
@@ -133,185 +195,236 @@ export default function BacklogPage() {
                 </div>
             </header>
 
-            <div className="flex-1 overflow-auto custom-scrollbar p-8">
+            <div className="flex-1 overflow-auto custom-scrollbar p-1 md:p-8">
                 <div className="max-w-6xl mx-auto">
-                    <header className="flex justify-between items-end mb-10">
+                    <header className="flex justify-between items-end mb-6 md:mb-10 px-2 md:px-0">
                         <div>
                             <nav className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1 opacity-60">Planning</nav>
-                            <h1 className="text-3xl font-black tracking-tight">Backlog</h1>
+                            <h1 className="text-2xl md:text-3xl font-black tracking-tight">Backlog</h1>
                         </div>
                         <Button
                             onClick={() => setIsSprintModalOpen(true)}
-                            className="bg-primary hover:shadow-lg active:scale-95 transition-all font-bold px-6"
+                            className="bg-primary hover:shadow-lg active:scale-95 transition-all font-bold px-4 md:px-6 text-xs md:text-sm"
                         >
                             Create Sprint
                         </Button>
                     </header>
 
-                    <div className="space-y-12 pb-20">
-                        {/* Planned Sprints */}
-                        {sprints.filter(s => s.status !== 'COMPLETED').map((sprint) => (
-                            <div
-                                key={sprint._id}
-                                className={`
-                                    bg-white rounded-2xl border-2 transition-all duration-300 overflow-hidden
-                                    ${sprint.status === 'ACTIVE' ? 'border-primary shadow-xl ring-4 ring-primary/5' : 'border-border shadow-sm hover:border-slate-300'}
-                                `}
-                                onDrop={(e) => handleDrop(e, sprint._id)}
-                                onDragOver={allowDrop}
-                            >
-                                <div className={`p-4 flex items-center justify-between border-b border-border ${sprint.status === 'ACTIVE' ? 'bg-primary/[0.03]' : 'bg-slate-50'}`}>
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex flex-col">
-                                            <div className="flex items-center gap-3">
-                                                <h3 className="font-black text-slate-800 tracking-tight">{sprint.name}</h3>
-                                                <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border tracking-widest uppercase ${sprint.status === 'ACTIVE' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-400 border-slate-200'}`}>
-                                                    {sprint.status}
-                                                </span>
-                                            </div>
-                                            <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">
-                                                {format(new Date(sprint.startDate), 'MMM d')} - {format(new Date(sprint.endDate), 'MMM d')} • {sprint.goal || 'No goal set'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        {sprint.status === 'PLANNED' && (
-                                            <Button
-                                                size="sm"
-                                                className="bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all font-bold text-xs px-4"
-                                                onClick={() => handleStartSprint(sprint._id)}
+                    <DragDropContext onDragEnd={onDragEnd}>
+                        <div className="space-y-6 md:space-y-12 pb-20">
+                            {/* Planned Sprints */}
+                            {sprints.filter(s => s.status !== 'COMPLETED').map((sprint) => {
+                                const isCreator = String(sprint.createdBy?._id || sprint.createdBy) === String(user?._id);
+                                return (
+                                    <Droppable key={sprint._id} droppableId={sprint._id}>
+                                        {(provided, snapshot) => (
+                                            <div
+                                                ref={provided.innerRef}
+                                                {...provided.droppableProps}
+                                                className={`
+                                            bg-white rounded-2xl border-2 transition-all duration-300 overflow-hidden
+                                            ${sprint.status === 'ACTIVE' ? 'border-primary shadow-xl ring-4 ring-primary/5' : 'border-border shadow-sm hover:border-slate-300'}
+                                            ${snapshot.isDraggingOver ? 'bg-slate-50 ring-2 ring-primary/20' : ''}
+                                        `}
                                             >
-                                                Start Sprint
-                                            </Button>
-                                        )}
-                                        {sprint.status === 'ACTIVE' && (
-                                            <Button
-                                                size="sm"
-                                                className="bg-green-600 hover:bg-green-700 text-white transition-all font-bold text-xs px-4"
-                                                onClick={() => handleCompleteSprint(sprint._id)}
-                                            >
-                                                Complete Sprint
-                                            </Button>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="p-2 space-y-1 min-h-[60px] bg-white">
-                                    {allTickets.filter(t => t.sprintId === sprint._id).map(ticket => (
-                                        <div
-                                            key={ticket._id}
-                                            draggable
-                                            onDragStart={(e) => handleDragStart(e, ticket._id)}
-                                            onClick={() => setSelectedTicket(ticket)}
-                                            className="group bg-white p-3 rounded-lg flex justify-between items-center cursor-move hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all"
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className={`w-1.5 h-6 rounded-full ${ticket.priority === 'High' || ticket.priority === 'Critical' ? 'bg-red-500' : 'bg-blue-500'}`}></div>
-                                                <span className="text-sm font-bold text-slate-700 group-hover:text-primary transition-colors">{ticket.title}</span>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                {ticket.assignee && (
-                                                    <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-black shadow-sm ring-2 ring-white" title={ticket.assignee.name || 'Unassigned'}>
-                                                        {(ticket.assignee.name || '?').charAt(0).toUpperCase()}
+                                                <div className={`p-4 flex items-center justify-between border-b border-border ${sprint.status === 'ACTIVE' ? 'bg-primary/[0.03]' : 'bg-slate-50'}`}>
+                                                    <div className="flex flex-col">
+                                                        <div className="flex items-center gap-3">
+                                                            <h3 className="font-black text-slate-800 tracking-tight text-sm md:text-base">{sprint.name}</h3>
+                                                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border tracking-widest uppercase ${sprint.status === 'ACTIVE' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-400 border-slate-200'}`}>
+                                                                {sprint.status}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">
+                                                            {format(new Date(sprint.startDate), 'MMM d')} - {format(new Date(sprint.endDate), 'MMM d')}
+                                                        </p>
                                                     </div>
-                                                )}
-                                                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${ticket.status === 'Done' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>{ticket.status}</span>
-                                                <span className="text-[10px] font-bold text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity">#{ticket._id.slice(-4)}</span>
+                                                    <div className="flex gap-2 items-center">
+                                                        {isCreator && (
+                                                            <button
+                                                                onClick={() => handleDeleteSprint(sprint._id)}
+                                                                className="p-2 rounded-lg hover:bg-red-50 text-slate-300 hover:text-red-500 transition-colors mr-2"
+                                                                title="Delete Sprint"
+                                                            >
+                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            </button>
+                                                        )}
+                                                        {sprint.status === 'PLANNED' && (
+                                                            <Button
+                                                                size="sm"
+                                                                className="bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all font-bold text-[10px] md:text-xs px-3 md:px-4 h-8"
+                                                                onClick={() => handleStartSprint(sprint._id)}
+                                                            >
+                                                                Start Sprint
+                                                            </Button>
+                                                        )}
+                                                        {sprint.status === 'ACTIVE' && (
+                                                            <Button
+                                                                size="sm"
+                                                                className="bg-green-600 hover:bg-green-700 text-white transition-all font-bold text-[10px] md:text-xs px-3 md:px-4 h-8"
+                                                                onClick={() => handleCompleteSprint(sprint._id)}
+                                                            >
+                                                                Complete Sprint
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="p-2 space-y-1 min-h-[60px] bg-white">
+                                                    {allTickets.filter(t => t.sprintId === sprint._id).map((ticket, index) => (
+                                                        <Draggable key={ticket._id} draggableId={ticket._id} index={index}>
+                                                            {(provided, snapshot) => (
+                                                                <div
+                                                                    ref={provided.innerRef}
+                                                                    {...provided.draggableProps}
+                                                                    {...provided.dragHandleProps}
+                                                                    onClick={(e) => {
+                                                                        if (!snapshot.isDragging) {
+                                                                            setSelectedTicket(ticket);
+                                                                        }
+                                                                    }}
+                                                                    style={{ ...provided.draggableProps.style }}
+                                                                    className={`
+                                                                    group bg-white p-3 rounded-lg flex justify-between items-center cursor-move border transition-all
+                                                                    ${snapshot.isDragging ? 'shadow-lg border-primary z-50 rotate-1' : 'hover:bg-slate-50 border-transparent hover:border-slate-200'}
+                                                                `}
+                                                                >
+                                                                    <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
+                                                                        <div className={`w-1.5 h-6 shrink-0 rounded-full ${ticket.priority === 'High' || ticket.priority === 'Critical' ? 'bg-red-500' : 'bg-blue-500'}`}></div>
+                                                                        <span className="text-xs md:text-sm font-bold text-slate-700 truncate group-hover:text-primary transition-colors">{ticket.title}</span>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2 md:gap-4 shrink-0 ml-2">
+                                                                        {ticket.assignee && (
+                                                                            <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-primary text-white flex items-center justify-center text-[9px] md:text-[10px] font-black shadow-sm ring-2 ring-white" title={ticket.assignee.name || 'Unassigned'}>
+                                                                                {(ticket.assignee.name || '?').charAt(0).toUpperCase()}
+                                                                            </div>
+                                                                        )}
+                                                                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter hidden sm:inline-block ${ticket.status === 'Done' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>{ticket.status}</span>
+                                                                        <span className="text-[9px] font-bold text-slate-300 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">#{ticket._id.slice(-4)}</span>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </Draggable>
+                                                    ))}
+                                                    {provided.placeholder}
+                                                    {allTickets.filter(t => t.sprintId === sprint._id).length === 0 && (
+                                                        <div className="py-8 text-center border-2 border-dashed border-slate-100 rounded-xl m-2">
+                                                            <p className="text-[10px] text-slate-300 font-black uppercase tracking-[0.2em]">Drag tickets here to plan</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </Droppable>
+                                );
+                            })}
+
+                            {/* Backlog Section */}
+                            <Droppable droppableId="BACKLOG">
+                                {(provided, snapshot) => (
+                                    <div
+                                        ref={provided.innerRef}
+                                        {...provided.droppableProps}
+                                        className={`
+                                        bg-white rounded-2xl border border-border shadow-sm overflow-hidden transition-colors
+                                        ${snapshot.isDraggingOver ? 'bg-slate-50 ring-2 ring-slate-200' : ''}
+                                    `}
+                                    >
+                                        <div className="p-4 bg-slate-50 border-b border-border flex justify-between items-center">
+                                            <div>
+                                                <h3 className="font-black text-slate-800 tracking-tight">Backlog</h3>
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{backlogTickets.length} Issues</p>
                                             </div>
                                         </div>
-                                    ))}
-                                    {allTickets.filter(t => t.sprintId === sprint._id).length === 0 && (
-                                        <div className="py-8 text-center border-2 border-dashed border-slate-100 rounded-xl m-2">
-                                            <p className="text-[10px] text-slate-300 font-black uppercase tracking-[0.2em]">Drag tickets here to plan</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-
-                        {/* Backlog Section */}
-                        <div
-                            className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden"
-                            onDrop={(e) => handleDrop(e, null)}
-                            onDragOver={allowDrop}
-                        >
-                            <div className="p-4 bg-slate-50 border-b border-border flex justify-between items-center">
-                                <div>
-                                    <h3 className="font-black text-slate-800 tracking-tight">Backlog</h3>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{backlogTickets.length} Issues</p>
-                                </div>
-                            </div>
-                            <div className="p-2 space-y-1 min-h-[100px]">
-                                {backlogTickets.map((ticket) => (
-                                    <div
-                                        key={ticket._id}
-                                        draggable
-                                        onDragStart={(e) => handleDragStart(e, ticket._id)}
-                                        onClick={() => setSelectedTicket(ticket)}
-                                        className="group bg-white p-3 rounded-lg flex justify-between items-center cursor-move hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-1.5 h-6 rounded-full ${ticket.priority === 'High' || ticket.priority === 'Critical' ? 'bg-red-500' : 'bg-blue-500'}`}></div>
-                                            <span className="text-sm font-bold text-slate-700 group-hover:text-primary transition-colors">{ticket.title}</span>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            {ticket.assignee && (
-                                                <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-black shadow-sm ring-2 ring-white" title={ticket.assignee.name}>
-                                                    {ticket.assignee.name.charAt(0).toUpperCase()}
+                                        <div className="p-2 space-y-1 min-h-[100px]">
+                                            {backlogTickets.map((ticket, index) => (
+                                                <Draggable key={ticket._id} draggableId={ticket._id} index={index}>
+                                                    {(provided, snapshot) => (
+                                                        <div
+                                                            ref={provided.innerRef}
+                                                            {...provided.draggableProps}
+                                                            {...provided.dragHandleProps}
+                                                            onClick={(e) => {
+                                                                if (!snapshot.isDragging) {
+                                                                    setSelectedTicket(ticket);
+                                                                }
+                                                            }}
+                                                            style={{ ...provided.draggableProps.style }}
+                                                            className={`
+                                                                group bg-white p-3 rounded-lg flex justify-between items-center cursor-move border transition-all
+                                                                ${snapshot.isDragging ? 'shadow-lg border-primary z-50 rotate-1' : 'hover:bg-slate-50 border-transparent hover:border-slate-200'}
+                                                            `}
+                                                        >
+                                                            <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
+                                                                <div className={`w-1.5 h-6 shrink-0 rounded-full ${ticket.priority === 'High' || ticket.priority === 'Critical' ? 'bg-red-500' : 'bg-blue-500'}`}></div>
+                                                                <span className="text-xs md:text-sm font-bold text-slate-700 truncate group-hover:text-primary transition-colors">{ticket.title}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 md:gap-4 shrink-0 ml-2">
+                                                                {ticket.assignee && (
+                                                                    <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-primary text-white flex items-center justify-center text-[9px] md:text-[10px] font-black shadow-sm ring-2 ring-white" title={ticket.assignee.name}>
+                                                                        {ticket.assignee.name.charAt(0).toUpperCase()}
+                                                                    </div>
+                                                                )}
+                                                                <span className="text-[9px] font-bold text-slate-300 group-hover:text-slate-500 transition-colors">#{ticket.key || ticket._id.slice(-4)}</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </Draggable>
+                                            ))}
+                                            {provided.placeholder}
+                                            {backlogTickets.length === 0 && (
+                                                <div className="py-12 text-center text-slate-400">
+                                                    <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 opacity-50">
+                                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    </div>
+                                                    <p className="text-xs font-bold uppercase tracking-widest opacity-60">Your backlog is clear</p>
                                                 </div>
                                             )}
-                                            <span className="text-[10px] font-bold text-slate-300 group-hover:text-slate-500 transition-colors">#{ticket.key || ticket._id.slice(-4)}</span>
                                         </div>
-                                    </div>
-                                ))}
-                                {backlogTickets.length === 0 && (
-                                    <div className="py-12 text-center text-slate-400">
-                                        <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 opacity-50">
-                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                            </svg>
-                                        </div>
-                                        <p className="text-xs font-bold uppercase tracking-widest opacity-60">Your backlog is clear</p>
                                     </div>
                                 )}
-                            </div>
-                        </div>
+                            </Droppable>
 
-                        {/* Completed Sprints Section */}
-                        {sprints.filter(s => s.status === 'COMPLETED').length > 0 && (
-                            <div className="pt-8">
-                                <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-6 flex items-center gap-3">
-                                    <span className="w-12 h-[1px] bg-slate-200"></span>
-                                    Completed Sprints
-                                    <span className="w-12 h-[1px] bg-slate-200"></span>
-                                </h2>
-                                <div className="space-y-4 opacity-100 transition-opacity">
-                                    {sprints.filter(s => s.status === 'COMPLETED').map((sprint) => (
-                                        <div
-                                            key={sprint._id}
-                                            onClick={() => setSelectedSprintForDetails(sprint)}
-                                            className="bg-white/50 backdrop-blur-sm rounded-2xl border border-slate-100 shadow-sm overflow-hidden grayscale-[0.5] opacity-80 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer hover:border-primary/30 group/sprint"
-                                        >
-                                            <div className="p-4 flex items-center justify-between border-b border-slate-50 bg-slate-50/30 group-hover/sprint:bg-primary/[0.02]">
-                                                <div>
-                                                    <h3 className="font-bold text-slate-600 tracking-tight">{sprint.name}</h3>
-                                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{format(new Date(sprint.startDate), 'MMM d')} - {format(new Date(sprint.endDate), 'MMM d')}</p>
-                                                </div>
-                                                <span className="text-[9px] font-black px-2 py-1 rounded-lg bg-slate-100 text-slate-400 border border-slate-200 uppercase tracking-widest">Completed</span>
-                                            </div>
-                                            <div className="p-2">
-                                                {allTickets.filter(t => t.sprintId === sprint._id).map(ticket => (
-                                                    <div key={ticket._id} className="p-2 flex justify-between items-center opacity-70">
-                                                        <span className="text-[11px] font-medium text-slate-500 line-through decoration-slate-300">{ticket.title}</span>
-                                                        <span className="text-[9px] font-bold text-slate-300">#{ticket.key || ticket._id.slice(-4)}</span>
+                            {/* Completed Sprints Section */}
+                            {sprints.filter(s => s.status === 'COMPLETED').length > 0 && (
+                                <div className="pt-8">
+                                    <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-6 flex items-center gap-3">
+                                        <span className="w-12 h-[1px] bg-slate-200"></span>
+                                        Completed Sprints
+                                        <span className="w-12 h-[1px] bg-slate-200"></span>
+                                    </h2>
+                                    <div className="space-y-4 opacity-100 transition-opacity">
+                                        {sprints.filter(s => s.status === 'COMPLETED').map((sprint) => (
+                                            <div
+                                                key={sprint._id}
+                                                onClick={() => setSelectedSprintForDetails(sprint)}
+                                                className="bg-white/50 backdrop-blur-sm rounded-2xl border border-slate-100 shadow-sm overflow-hidden grayscale-[0.5] opacity-80 hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer hover:border-primary/30 group/sprint"
+                                            >
+                                                <div className="p-4 flex items-center justify-between border-b border-slate-50 bg-slate-50/30 group-hover/sprint:bg-primary/[0.02]">
+                                                    <div>
+                                                        <h3 className="font-bold text-slate-600 tracking-tight">{sprint.name}</h3>
+                                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{format(new Date(sprint.startDate), 'MMM d')} - {format(new Date(sprint.endDate), 'MMM d')}</p>
                                                     </div>
-                                                ))}
+                                                    <span className="text-[9px] font-black px-2 py-1 rounded-lg bg-slate-100 text-slate-400 border border-slate-200 uppercase tracking-widest">Completed</span>
+                                                </div>
+                                                <div className="p-2">
+                                                    {allTickets.filter(t => t.sprintId === sprint._id).map(ticket => (
+                                                        <div key={ticket._id} className="p-2 flex justify-between items-center opacity-70">
+                                                            <span className="text-[11px] font-medium text-slate-500 line-through decoration-slate-300">{ticket.title}</span>
+                                                            <span className="text-[9px] font-bold text-slate-300">#{ticket.key || ticket._id.slice(-4)}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                    </div>
+                            )}
+                        </div>
+                    </DragDropContext>
                 </div>
             </div>
 
@@ -335,6 +448,15 @@ export default function BacklogPage() {
                 isOpen={!!selectedSprintForDetails}
                 onClose={() => setSelectedSprintForDetails(null)}
                 sprint={selectedSprintForDetails}
+            />
+            <ConfirmationModal
+                isOpen={confirmationModal.isOpen}
+                onClose={() => setConfirmationModal(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmationModal.onConfirm}
+                title={confirmationModal.title}
+                message={confirmationModal.message}
+                variant={confirmationModal.variant}
+                confirmText={confirmationModal.confirmText}
             />
         </div>
     );

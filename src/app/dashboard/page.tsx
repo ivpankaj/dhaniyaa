@@ -9,9 +9,72 @@ import NotificationDropdown from '@/components/NotificationDropdown';
 import CreateOrganizationModal from '@/components/CreateOrganizationModal';
 import { InviteMemberModal } from '@/components/InviteMemberModal';
 import { SettingsModal } from '@/components/SettingsModal';
+import { ConfirmationModal } from '@/components/ConfirmationModal';
+
+import { toast } from 'sonner';
 
 export default function DashboardPage() {
     const { user, logout } = useAuth();
+
+
+    const [confirmationModal, setConfirmationModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => { },
+    });
+
+    const handleDeleteProject = (projectId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setConfirmationModal({
+            isOpen: true,
+            title: 'Delete Project',
+            message: 'Are you sure you want to delete this project?',
+            onConfirm: async () => {
+                try {
+                    await api.delete(`/api/projects/${projectId}`);
+                    setProjects(prev => prev.filter(p => p._id !== projectId));
+                    toast.success('Project deleted successfully');
+                } catch (err: any) {
+                    toast.error(err.response?.data?.message || 'Failed to delete project');
+                }
+            }
+        });
+    };
+
+    const handleDeleteOrg = (orgId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setConfirmationModal({
+            isOpen: true,
+            title: 'Delete Organization',
+            message: 'Are you sure you want to delete this organization? This will verify that you are the owner.',
+            onConfirm: async () => {
+                try {
+                    await api.delete(`/api/organizations/${orgId}`);
+                    const newOrgs = orgs.filter(o => o._id !== orgId);
+                    setOrgs(newOrgs);
+                    if (selectedOrgId === orgId) {
+                        if (newOrgs.length > 0) {
+                            setSelectedOrgId(newOrgs[0]._id);
+                        } else {
+                            setSelectedOrgId(null);
+                            setViewMode('shared');
+                        }
+                    }
+                    toast.success('Organization deleted successfully');
+                } catch (err: any) {
+                    toast.error(err.response?.data?.message || 'Failed to delete organization');
+                }
+            }
+        });
+    };
+
+
     const router = useRouter();
     const [orgs, setOrgs] = useState<any[]>([]);
     const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
@@ -41,7 +104,6 @@ export default function DashboardPage() {
                 }
             } catch (err) {
                 console.error('Failed to fetch orgs');
-            } finally {
                 setLoading(false);
             }
         };
@@ -75,10 +137,13 @@ export default function DashboardPage() {
                 setProjects(res.data.data);
             } catch (err) {
                 console.error('Failed to fetch projects');
+            } finally {
+                setLoading(false);
             }
         };
 
         if (selectedOrgId || viewMode === 'shared') {
+            setLoading(true);
             fetchProjects();
         }
     }, [selectedOrgId, viewMode]);
@@ -178,7 +243,20 @@ export default function DashboardPage() {
                                     {selectedOrgId === org._id && viewMode === 'org' && (
                                         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-2/3 bg-sidebar-accent rounded-r-full"></div>
                                     )}
-                                    <span className="truncate block">{org.name}</span>
+                                    <div className="flex justify-between items-center w-full">
+                                        <span className="truncate block">{org.name}</span>
+                                        {org.owner === user?._id && (
+                                            <div
+                                                onClick={(e) => handleDeleteOrg(org._id, e)}
+                                                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 text-red-400 rounded transition-all"
+                                                title="Delete Organization"
+                                            >
+                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </div>
+                                        )}
+                                    </div>
                                 </button>
                             ))}
                         </div>
@@ -386,6 +464,16 @@ export default function DashboardPage() {
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                             </svg>
                                                         </div>
+                                                        {project.createdBy === user?._id && (
+                                                            <div className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all hover:bg-red-500 hover:text-white"
+                                                                onClick={(e) => handleDeleteProject(project._id, e)}
+                                                                title="Delete Project"
+                                                            >
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
@@ -444,6 +532,13 @@ export default function DashboardPage() {
                 <SettingsModal
                     isOpen={isSettingsModalOpen}
                     onClose={() => setIsSettingsModalOpen(false)}
+                />
+                <ConfirmationModal
+                    isOpen={confirmationModal.isOpen}
+                    onClose={() => setConfirmationModal(prev => ({ ...prev, isOpen: false }))}
+                    onConfirm={confirmationModal.onConfirm}
+                    title={confirmationModal.title}
+                    message={confirmationModal.message}
                 />
             </main>
         </div>

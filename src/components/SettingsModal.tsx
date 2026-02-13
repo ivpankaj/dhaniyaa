@@ -60,25 +60,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                     </button>
                 </div>
 
-                <div className="flex flex-1 min-h-0">
+                <div className="flex flex-col md:flex-row flex-1 min-h-0">
                     {/* Sidebar Nav */}
-                    <aside className="w-48 border-r border-slate-100 bg-slate-50/30 p-4 space-y-2">
+                    <aside className="w-full md:w-48 border-b md:border-b-0 md:border-r border-slate-100 bg-slate-50/30 p-2 md:p-4 flex md:flex-col gap-2 overflow-x-auto md:overflow-visible no-scrollbar">
                         <button
                             onClick={() => setActiveTab('profile')}
-                            className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'profile' ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100'}`}
+                            className={`flex-1 md:flex-none text-center md:text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'profile' ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100'}`}
                         >
                             Profile
                         </button>
                         <button
                             onClick={() => setActiveTab('security')}
-                            className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'security' ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100'}`}
+                            className={`flex-1 md:flex-none text-center md:text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'security' ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-500 hover:bg-slate-100'}`}
                         >
                             Security
                         </button>
                     </aside>
 
                     {/* Content area */}
-                    <main className="flex-1 p-8 overflow-y-auto custom-scrollbar">
+                    <main className="flex-1 p-4 md:p-8 overflow-y-auto custom-scrollbar">
                         {activeTab === 'profile' ? (
                             <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
                                 <div className="flex items-center gap-6 mb-10">
