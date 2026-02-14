@@ -28,7 +28,7 @@ export default function SprintDetailModal({ isOpen, onClose, sprint }: SprintDet
             setTickets(res.data.data);
         } catch (err) {
             console.error('Failed to fetch sprint tickets', err);
-            toast.error('Failed to load sprint details');
+            toast.error('Failed to load cycle details');
         } finally {
             setLoading(false);
         }
@@ -56,7 +56,7 @@ export default function SprintDetailModal({ isOpen, onClose, sprint }: SprintDet
                         </p>
                         {sprint.goal && (
                             <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-primary/5 rounded-xl border border-primary/10">
-                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary block mb-1">Sprint Goal</span>
+                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary block mb-1">Cycle Goal</span>
                                 <p className="text-xs sm:text-sm font-medium text-slate-700 italic line-clamp-2">"{sprint.goal}"</p>
                             </div>
                         )}
@@ -85,7 +85,7 @@ export default function SprintDetailModal({ isOpen, onClose, sprint }: SprintDet
                             <div className="bg-amber-50 border-2 border-amber-100 p-4 sm:p-6 rounded-2xl shadow-sm text-center">
                                 <span className="text-[10px] font-black text-amber-600/60 uppercase tracking-widest block mb-1">Pushed Back</span>
                                 <span className="text-2xl sm:text-3xl font-black text-amber-600">{sprint.summary.pushedBackTickets}</span>
-                                <p className="text-[9px] font-black text-amber-600/40 uppercase mt-1">Moved to Backlog</p>
+                                <p className="text-[9px] font-black text-amber-600/40 uppercase mt-1">Returned to List</p>
                             </div>
                         </div>
                     )}
@@ -101,7 +101,7 @@ export default function SprintDetailModal({ isOpen, onClose, sprint }: SprintDet
                                 {loading ? (
                                     [1, 2].map(i => <div key={i} className="h-12 bg-slate-50 rounded-xl animate-pulse" />)
                                 ) : completed.length === 0 ? (
-                                    <p className="text-[10px] font-bold text-slate-400 italic py-4">No tickets were completed in this sprint.</p>
+                                    <p className="text-[10px] font-bold text-slate-400 italic py-4">No tickets were completed in this cycle.</p>
                                 ) : (
                                     completed.map(ticket => (
                                         <div key={ticket._id} className="p-3 bg-white border border-slate-100 rounded-xl flex items-center justify-between shadow-sm">
@@ -126,7 +126,7 @@ export default function SprintDetailModal({ isOpen, onClose, sprint }: SprintDet
                                 {loading ? (
                                     [1, 2].map(i => <div key={i} className="h-12 bg-slate-50 rounded-xl animate-pulse" />)
                                 ) : incomplete.length === 0 ? (
-                                    <p className="text-[10px] font-bold text-slate-400 italic py-4">Perfect sprint! All committed work was finished.</p>
+                                    <p className="text-[10px] font-bold text-slate-400 italic py-4">Perfect cycle! All committed work was finished.</p>
                                 ) : (
                                     incomplete.map(ticket => (
                                         <div key={ticket._id} className="p-3 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl flex items-center justify-between">

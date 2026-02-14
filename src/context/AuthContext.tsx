@@ -37,13 +37,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     const freshUser = res.data.data;
                     setUser(freshUser);
                     localStorage.setItem('user', JSON.stringify(freshUser));
-                } catch (err) {
-                    console.error('Failed to fetch user', err);
-                    if (storedUser) {
-                        setUser(JSON.parse(storedUser));
-                    } else {
-                        // Token might be invalid
+                } catch (err: any) {
+                    // If unauthorized, clear everything and redirect to login
+                    if (err.response?.status === 401) {
+                        console.log('Session expired or invalid, redirecting to login...');
                         localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        setUser(null);
+                        router.push('/login');
+                    } else {
+                        console.error('Failed to fetch user', err);
+                        // For other errors (network, server), we might want to keep the local user state
+                        // or handle it differently.
+                        if (storedUser) {
+                            setUser(JSON.parse(storedUser));
+                        } else {
+                            localStorage.removeItem('token');
+                        }
                     }
                 }
             }

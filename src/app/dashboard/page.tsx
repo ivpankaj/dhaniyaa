@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
+import Image from 'next/image';
 import CreateProjectModal from '@/components/CreateProjectModal';
 import NotificationDropdown from '@/components/NotificationDropdown';
 import CreateOrganizationModal from '@/components/CreateOrganizationModal';
@@ -197,10 +198,10 @@ export default function DashboardPage() {
             {/* Sidebar */}
             <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground flex flex-col shrink-0 overflow-hidden transition-transform duration-300 transform lg:relative lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
                 <div className="p-6 flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white rounded flex items-center justify-center shrink-0 shadow-sm transition-transform hover:scale-105">
-                        <span className="text-sidebar font-black text-xl">D</span>
+                    <div className="w-8 h-8 rounded flex items-center justify-center shrink-0 shadow-sm transition-transform hover:scale-105 relative overflow-hidden">
+                        <Image src="/logo.png" alt="Dhaniyaa" fill className="object-contain" />
                     </div>
-                    <h1 className="text-xl font-black tracking-tighter truncate">dhaniyaa</h1>
+                    <h1 className="text-xl font-black tracking-tighter truncate">Dhaniyaa</h1>
                 </div>
 
                 <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
@@ -248,7 +249,7 @@ export default function DashboardPage() {
                                         {org.owner === user?._id && (
                                             <div
                                                 onClick={(e) => handleDeleteOrg(org._id, e)}
-                                                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 text-red-400 rounded transition-all"
+                                                className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-red-500/20 text-red-400 rounded transition-all"
                                                 title="Delete Organization"
                                             >
                                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -403,7 +404,7 @@ export default function DashboardPage() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-7h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                             </svg>
                                         </div>
-                                        <h3 className="text-3xl font-extrabold mb-3 tracking-tight text-slate-800">Welcome to dhaniyaa</h3>
+                                        <h3 className="text-3xl font-extrabold mb-3 tracking-tight text-slate-800">Welcome to Dhaniyaa</h3>
                                         <p className="text-slate-500 max-w-sm mb-10 font-bold leading-relaxed">The next-gen solution for modern engineering teams. Start by defining your first organization.</p>
                                         <button
                                             onClick={() => setIsOrgModalOpen(true)}
@@ -446,7 +447,7 @@ export default function DashboardPage() {
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         {(project.members?.find((m: any) => m.userId === user?._id)?.role === 'ProjectAdmin' || project.createdBy === user?._id || user?.role === 'OrganizationOwner') && (
-                                                            <div className="w-8 h-8 rounded-full bg-accent text-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-primary hover:text-white"
+                                                            <div className="w-8 h-8 rounded-full bg-accent text-primary flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all hover:bg-primary hover:text-white"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     setInviteProject(project);
@@ -459,13 +460,13 @@ export default function DashboardPage() {
                                                                 </svg>
                                                             </div>
                                                         )}
-                                                        <div className="w-8 h-8 rounded-full bg-accent text-primary flex items-center justify-center opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all">
+                                                        <div className="w-8 h-8 rounded-full bg-accent text-primary flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 translate-x-0 lg:translate-x-4 lg:group-hover:translate-x-0 transition-all">
                                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                             </svg>
                                                         </div>
                                                         {project.createdBy === user?._id && (
-                                                            <div className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all hover:bg-red-500 hover:text-white"
+                                                            <div className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 translate-x-0 lg:translate-x-4 lg:group-hover:translate-x-0 transition-all hover:bg-red-500 hover:text-white"
                                                                 onClick={(e) => handleDeleteProject(project._id, e)}
                                                                 title="Delete Project"
                                                             >
@@ -487,7 +488,7 @@ export default function DashboardPage() {
                                             </svg>
                                         </div>
                                         <p className="text-slate-500 mb-8 font-bold tracking-tight">
-                                            {viewMode === 'shared' ? "You haven't joined any projects yet." : "Your organization is ready for its first project."}
+                                            {viewMode === 'shared' ? "You haven't joined any projects yet. Create Organisation to create a Project" : "Your organization is ready for its first project."}
                                         </p>
                                         {viewMode !== 'shared' && (
                                             <button

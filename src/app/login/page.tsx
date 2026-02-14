@@ -65,12 +65,12 @@ export default function LoginPage() {
     return (
         <div className="flex min-h-screen">
             {/* Left Side - Branding */}
-            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600 relative overflow-hidden">
+            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-violet-600 via-violet-500 to-emerald-500 relative overflow-hidden">
                 {/* Animated background shapes */}
                 <div className="absolute inset-0 opacity-20">
                     <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full mix-blend-overlay filter blur-3xl animate-blob"></div>
                     <div className="absolute top-40 right-20 w-72 h-72 bg-purple-300 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-2000"></div>
-                    <div className="absolute bottom-20 left-40 w-72 h-72 bg-blue-300 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-4000"></div>
+                    <div className="absolute bottom-20 left-40 w-72 h-72 bg-emerald-300 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-4000"></div>
                 </div>
 
                 {/* Content */}
@@ -85,7 +85,7 @@ export default function LoginPage() {
                         <h2 className="text-5xl font-black leading-tight mb-6">
                             Manage projects<br />with confidence
                         </h2>
-                        <p className="text-xl text-blue-100 font-medium leading-relaxed">
+                        <p className="text-xl text-violet-100 font-medium leading-relaxed">
                             Streamline your workflow, collaborate seamlessly, and deliver projects on time with Dhaniyaa.
                         </p>
                     </div>
@@ -119,7 +119,7 @@ export default function LoginPage() {
                 <div className="w-full max-w-md">
                     {/* Mobile Logo */}
                     <div className="lg:hidden flex items-center gap-3 mb-8">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center p-2">
+                        <div className="w-12 h-12 bg-gradient-to-br from-violet-600 to-emerald-500 rounded-2xl flex items-center justify-center p-2">
                             <DhaniyaaLogo className="w-full h-full" />
                         </div>
                         <h1 className="text-2xl font-black text-slate-800">Dhaniyaa</h1>
@@ -149,20 +149,25 @@ export default function LoginPage() {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full bg-slate-50 border-2 border-slate-200 px-4 py-3.5 rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all font-medium text-slate-800"
+                                    className="w-full bg-slate-50 border-2 border-slate-200 px-4 py-3.5 rounded-xl focus:outline-none focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100 transition-all font-medium text-slate-800"
                                     placeholder="you@company.com"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-2">Password</label>
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="block text-sm font-bold text-slate-700">Password</label>
+                                    <Link href="/forgot-password" className="text-sm font-semibold text-violet-600 hover:text-violet-700 hover:underline">
+                                        Forgot password?
+                                    </Link>
+                                </div>
                                 <div className="relative">
                                     <input
                                         type={showPassword ? 'text' : 'password'}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full bg-slate-50 border-2 border-slate-200 px-4 py-3.5 rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all font-medium text-slate-800 pr-12"
+                                        className="w-full bg-slate-50 border-2 border-slate-200 px-4 py-3.5 rounded-xl focus:outline-none focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100 transition-all font-medium text-slate-800 pr-12"
                                         placeholder="••••••••"
                                         required
                                     />
@@ -179,7 +184,7 @@ export default function LoginPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-bold text-base hover:shadow-2xl hover:shadow-blue-500/50 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
+                                className="w-full bg-gradient-to-r from-violet-600 to-emerald-500 text-white py-4 rounded-xl font-bold text-base hover:shadow-2xl hover:shadow-emerald-500/30 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
                             >
                                 {loading ? (
                                     <span className="flex items-center justify-center gap-2">
@@ -222,7 +227,7 @@ export default function LoginPage() {
                         <div className="mt-8 text-center">
                             <p className="text-slate-600 font-medium text-sm">
                                 New to Dhaniyaa?{' '}
-                                <Link href="/register" className="text-blue-600 hover:text-blue-700 font-bold hover:underline decoration-2 underline-offset-4">
+                                <Link href="/register" className="text-violet-600 hover:text-violet-700 font-bold hover:underline decoration-2 underline-offset-4">
                                     Create workspace
                                 </Link>
                             </p>

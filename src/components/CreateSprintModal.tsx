@@ -33,11 +33,11 @@ export default function CreateSprintModal({ isOpen, onClose, projectId, onSprint
                 goal,
                 projectId
             });
-            toast.success('Sprint created successfully');
+            toast.success('Cycle created successfully');
             if (onSprintCreated) onSprintCreated(res.data.data);
             onClose();
         } catch (err) {
-            toast.error('Failed to create sprint');
+            toast.error('Failed to create cycle');
         } finally {
             setLoading(false);
         }
@@ -49,7 +49,7 @@ export default function CreateSprintModal({ isOpen, onClose, projectId, onSprint
                 {/* Header */}
                 <div className="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/50 shrink-0">
                     <div>
-                        <h2 className="text-xl font-black text-slate-800 tracking-tight leading-none mb-1">Create New Sprint</h2>
+                        <h2 className="text-xl font-black text-slate-800 tracking-tight leading-none mb-1">Create New Cycle</h2>
                         <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest italic">Plan your next cycle</p>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
@@ -63,13 +63,13 @@ export default function CreateSprintModal({ isOpen, onClose, projectId, onSprint
                     {/* Scrollable Content Area */}
                     <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
                         <div className="animate-in slide-in-from-bottom-2 duration-300">
-                            <label className="block text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 mb-2 ml-1">Sprint Name</label>
+                            <label className="block text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 mb-2 ml-1">Cycle Name</label>
                             <input
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 className="w-full bg-slate-50 border-2 border-slate-100 px-5 py-4 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-primary/40 focus:bg-white transition-all placeholder:text-slate-300"
-                                placeholder="e.g., Sprint 1: Foundation"
+                                placeholder="e.g., Cycle 1: Foundation"
                                 required
                             />
                         </div>
@@ -98,12 +98,12 @@ export default function CreateSprintModal({ isOpen, onClose, projectId, onSprint
                         </div>
 
                         <div className="animate-in slide-in-from-bottom-2 duration-300 delay-150">
-                            <label className="block text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 mb-2 ml-1">Sprint Goal</label>
+                            <label className="block text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 mb-2 ml-1">Cycle Goal</label>
                             <textarea
                                 value={goal}
                                 onChange={(e) => setGoal(e.target.value)}
                                 className="w-full bg-slate-50 border-2 border-slate-100 px-5 py-4 rounded-2xl text-sm font-medium text-slate-600 outline-none focus:border-primary/40 focus:bg-white transition-all min-h-[100px] placeholder:text-slate-300"
-                                placeholder="What do we want to achieve in this sprint?"
+                                placeholder="What do we want to achieve in this cycle?"
                             />
                         </div>
                     </div>
@@ -126,7 +126,7 @@ export default function CreateSprintModal({ isOpen, onClose, projectId, onSprint
                             {loading ? (
                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             ) : (
-                                'Create Sprint'
+                                'Create Cycle'
                             )}
                         </Button>
                     </div>

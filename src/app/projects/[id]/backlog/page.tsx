@@ -71,16 +71,16 @@ export default function BacklogPage() {
     const handleDeleteSprint = (sprintId: string) => {
         setConfirmationModal({
             isOpen: true,
-            title: 'Delete Sprint',
-            message: 'Are you sure you want to delete this sprint? Tickets will be moved to the backlog.',
+            title: 'Delete Cycle',
+            message: 'Are you sure you want to delete this cycle? Tickets will be returned to the unscheduled list.',
             variant: 'danger',
             onConfirm: async () => {
                 try {
                     await api.delete(`/api/sprints/${sprintId}`);
-                    toast.success('Sprint deleted successfully');
+                    toast.success('Cycle deleted successfully');
                     fetchData();
                 } catch (err: any) {
-                    toast.error(err.response?.data?.message || 'Failed to delete sprint');
+                    toast.error(err.response?.data?.message || 'Failed to delete cycle');
                 }
             }
         });
@@ -126,26 +126,26 @@ export default function BacklogPage() {
         try {
             await api.patch(`/api/sprints/${sprintId}`, { status: 'ACTIVE' });
             fetchData();
-            toast.success('Sprint started!');
+            toast.success('Cycle started!');
         } catch (err) {
-            toast.error('Failed to start sprint');
+            toast.error('Failed to start cycle');
         }
     };
 
     const handleCompleteSprint = (sprintId: string) => {
         setConfirmationModal({
             isOpen: true,
-            title: 'Complete Sprint',
-            message: 'Are you sure you want to complete this sprint? Incomplete tickets will be moved to the backlog.',
+            title: 'Complete Cycle',
+            message: 'Are you sure you want to complete this cycle? Incomplete tickets will be returned to the unscheduled list.',
             variant: 'warning',
             confirmText: 'Complete',
             onConfirm: async () => {
                 try {
                     await api.patch(`/api/sprints/${sprintId}/complete`);
                     fetchData();
-                    toast.success('Sprint completed!');
+                    toast.success('Cycle completed!');
                 } catch (err) {
-                    toast.error('Failed to complete sprint');
+                    toast.error('Failed to complete cycle');
                 }
             }
         });
@@ -157,7 +157,7 @@ export default function BacklogPage() {
     if (loading) return (
         <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
             <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-xs font-black uppercase tracking-widest text-muted-foreground animate-pulse">Loading Backlog...</p>
+            <p className="text-xs font-black uppercase tracking-widest text-muted-foreground animate-pulse">Loading Planner...</p>
         </div>
     );
 
@@ -190,7 +190,7 @@ export default function BacklogPage() {
                         Task Board
                     </button>
                     <button className="px-4 py-1.5 text-xs font-bold bg-primary text-white rounded shadow-sm">
-                        Backlog
+                        Planner
                     </button>
                 </div>
             </header>
@@ -200,13 +200,13 @@ export default function BacklogPage() {
                     <header className="flex justify-between items-end mb-6 md:mb-10 px-2 md:px-0">
                         <div>
                             <nav className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1 opacity-60">Planning</nav>
-                            <h1 className="text-2xl md:text-3xl font-black tracking-tight">Backlog</h1>
+                            <h1 className="text-2xl md:text-3xl font-black tracking-tight">Project Plan</h1>
                         </div>
                         <Button
                             onClick={() => setIsSprintModalOpen(true)}
                             className="bg-primary hover:shadow-lg active:scale-95 transition-all font-bold px-4 md:px-6 text-xs md:text-sm"
                         >
-                            Create Sprint
+                            Create Cycle
                         </Button>
                     </header>
 
@@ -244,7 +244,7 @@ export default function BacklogPage() {
                                                             <button
                                                                 onClick={() => handleDeleteSprint(sprint._id)}
                                                                 className="p-2 rounded-lg hover:bg-red-50 text-slate-300 hover:text-red-500 transition-colors mr-2"
-                                                                title="Delete Sprint"
+                                                                title="Delete Cycle"
                                                             >
                                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -257,7 +257,7 @@ export default function BacklogPage() {
                                                                 className="bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all font-bold text-[10px] md:text-xs px-3 md:px-4 h-8"
                                                                 onClick={() => handleStartSprint(sprint._id)}
                                                             >
-                                                                Start Sprint
+                                                                Start Cycle
                                                             </Button>
                                                         )}
                                                         {sprint.status === 'ACTIVE' && (
@@ -266,7 +266,7 @@ export default function BacklogPage() {
                                                                 className="bg-green-600 hover:bg-green-700 text-white transition-all font-bold text-[10px] md:text-xs px-3 md:px-4 h-8"
                                                                 onClick={() => handleCompleteSprint(sprint._id)}
                                                             >
-                                                                Complete Sprint
+                                                                Complete Cycle
                                                             </Button>
                                                         )}
                                                     </div>
@@ -333,7 +333,7 @@ export default function BacklogPage() {
                                     >
                                         <div className="p-4 bg-slate-50 border-b border-border flex justify-between items-center">
                                             <div>
-                                                <h3 className="font-black text-slate-800 tracking-tight">Backlog</h3>
+                                                <h3 className="font-black text-slate-800 tracking-tight">Unscheduled Tasks</h3>
                                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{backlogTickets.length} Issues</p>
                                             </div>
                                         </div>
@@ -380,7 +380,7 @@ export default function BacklogPage() {
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                         </svg>
                                                     </div>
-                                                    <p className="text-xs font-bold uppercase tracking-widest opacity-60">Your backlog is clear</p>
+                                                    <p className="text-xs font-bold uppercase tracking-widest opacity-60">No unscheduled tasks</p>
                                                 </div>
                                             )}
                                         </div>
@@ -393,7 +393,7 @@ export default function BacklogPage() {
                                 <div className="pt-8">
                                     <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-6 flex items-center gap-3">
                                         <span className="w-12 h-[1px] bg-slate-200"></span>
-                                        Completed Sprints
+                                        Completed Cycles
                                         <span className="w-12 h-[1px] bg-slate-200"></span>
                                     </h2>
                                     <div className="space-y-4 opacity-100 transition-opacity">

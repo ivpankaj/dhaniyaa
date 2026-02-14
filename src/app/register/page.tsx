@@ -76,11 +76,11 @@ export default function RegisterPage() {
     return (
         <div className="flex min-h-screen">
             {/* Left Side - Branding */}
-            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-600 via-blue-500 to-blue-600 relative overflow-hidden">
+            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-violet-600 via-emerald-500 to-violet-500 relative overflow-hidden">
                 {/* Animated background shapes */}
                 <div className="absolute inset-0 opacity-20">
                     <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full mix-blend-overlay filter blur-3xl animate-blob"></div>
-                    <div className="absolute top-40 right-20 w-72 h-72 bg-blue-300 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-2000"></div>
+                    <div className="absolute top-40 right-20 w-72 h-72 bg-emerald-300 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-2000"></div>
                     <div className="absolute bottom-20 left-40 w-72 h-72 bg-purple-300 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-4000"></div>
                 </div>
 
@@ -96,7 +96,7 @@ export default function RegisterPage() {
                         <h2 className="text-5xl font-black leading-tight mb-6">
                             Start your journey<br />to better projects
                         </h2>
-                        <p className="text-xl text-blue-100 font-medium leading-relaxed">
+                        <p className="text-xl text-violet-100 font-medium leading-relaxed">
                             Join thousands of teams already using Dhaniyaa to streamline their workflow and boost productivity.
                         </p>
                     </div>
@@ -130,7 +130,7 @@ export default function RegisterPage() {
                 <div className="w-full max-w-md">
                     {/* Mobile Logo */}
                     <div className="lg:hidden flex items-center gap-3 mb-8">
-                        <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center p-2">
+                        <div className="w-12 h-12 bg-gradient-to-br from-violet-600 to-emerald-500 rounded-2xl flex items-center justify-center p-2">
                             <DhaniyaaLogo className="w-full h-full" />
                         </div>
                         <h1 className="text-2xl font-black text-slate-800">Dhaniyaa</h1>
@@ -160,7 +160,7 @@ export default function RegisterPage() {
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full bg-slate-50 border-2 border-slate-200 px-4 py-3.5 rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all font-medium text-slate-800"
+                                    className="w-full bg-slate-50 border-2 border-slate-200 px-4 py-3.5 rounded-xl focus:outline-none focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100 transition-all font-medium text-slate-800"
                                     placeholder="John Doe"
                                     required
                                 />
@@ -172,7 +172,7 @@ export default function RegisterPage() {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full bg-slate-50 border-2 border-slate-200 px-4 py-3.5 rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all font-medium text-slate-800"
+                                    className="w-full bg-slate-50 border-2 border-slate-200 px-4 py-3.5 rounded-xl focus:outline-none focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100 transition-all font-medium text-slate-800"
                                     placeholder="you@company.com"
                                     required
                                 />
@@ -185,7 +185,7 @@ export default function RegisterPage() {
                                         type={showPassword ? 'text' : 'password'}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full bg-slate-50 border-2 border-slate-200 px-4 py-3.5 rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all font-medium text-slate-800 pr-12"
+                                        className="w-full bg-slate-50 border-2 border-slate-200 px-4 py-3.5 rounded-xl focus:outline-none focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100 transition-all font-medium text-slate-800 pr-12"
                                         placeholder="Min. 8 characters"
                                         required
                                     />
@@ -233,7 +233,7 @@ export default function RegisterPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-bold text-base hover:shadow-2xl hover:shadow-purple-500/50 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none mt-6"
+                                className="w-full bg-gradient-to-r from-violet-600 to-emerald-500 text-white py-4 rounded-xl font-bold text-base hover:shadow-2xl hover:shadow-emerald-500/30 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none mt-6"
                             >
                                 {loading ? (
                                     <span className="flex items-center justify-center gap-2">
@@ -276,7 +276,7 @@ export default function RegisterPage() {
                         <div className="mt-8 text-center">
                             <p className="text-slate-600 font-medium text-sm">
                                 Already have a workspace?{' '}
-                                <Link href="/login" className="text-blue-600 hover:text-blue-700 font-bold hover:underline decoration-2 underline-offset-4">
+                                <Link href="/login" className="text-violet-600 hover:text-violet-700 font-bold hover:underline decoration-2 underline-offset-4">
                                     Sign in
                                 </Link>
                             </p>

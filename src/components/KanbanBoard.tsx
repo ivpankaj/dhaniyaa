@@ -32,7 +32,7 @@ export default function KanbanBoard({ projectId, sprintId, onTicketClick, search
         const fetchTickets = async () => {
             setLoading(true);
             try {
-                let url = `/api/tickets?projectId=${projectId}`;
+                let url = `/api/tickets?projectId=${projectId}&limit=100`;
                 if (sprintId) {
                     url += `&sprintId=${sprintId}`;
                 }

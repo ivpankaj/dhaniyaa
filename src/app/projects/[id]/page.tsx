@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import KanbanBoard from '@/components/KanbanBoard';
 import api from '@/lib/api';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import CreateTicketModal from '@/components/CreateTicketModal';
 import TicketDetailModal from '@/components/TicketDetailModal';
 import { InviteMemberModal } from '@/components/InviteMemberModal';
@@ -23,7 +23,27 @@ export default function ProjectBoardPage() {
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [selectedTicket, setSelectedTicket] = useState<any>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const searchParams = useSearchParams();
+    const ticketIdParam = searchParams.get('ticketId');
 
+    useEffect(() => {
+        if (ticketIdParam && project) {
+            // Avoid re-fetching if already selected
+            if (selectedTicket?._id !== ticketIdParam) {
+                api.get(`/api/tickets/${ticketIdParam}`)
+                    .then(res => {
+                        if (String(res.data.data.projectId) === String(params.id)) {
+                            setSelectedTicket(res.data.data);
+                        }
+                    })
+                    .catch(() => {
+                        setSelectedTicket(null);
+                    });
+            }
+        } else if (!ticketIdParam) {
+            setSelectedTicket(null);
+        }
+    }, [ticketIdParam, project, params.id, selectedTicket?._id]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -100,7 +120,7 @@ export default function ProjectBoardPage() {
                         onClick={() => router.push(`/projects/${project._id}/backlog`)}
                         className="px-2 sm:px-4 py-1.5 text-[10px] sm:text-xs font-bold hover:bg-slate-100 rounded transition-colors border border-transparent hover:border-border whitespace-nowrap"
                     >
-                        Backlog
+                        Planner
                     </button>
                     <button className="px-2 sm:px-4 py-1.5 text-[10px] sm:text-xs font-bold bg-primary text-white rounded shadow-sm hover:opacity-90 active:scale-95 transition-all whitespace-nowrap">
                         Board
@@ -147,7 +167,7 @@ export default function ProjectBoardPage() {
                                     ))}
                                 </div>
                             ) : (
-                                <span className="text-muted-foreground bg-slate-100 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">No active sprint</span>
+                                <span className="text-muted-foreground bg-slate-100 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">No active cycle</span>
                             )}
                             <div className="flex items-center gap-2">
                                 <div className="flex -space-x-2">
@@ -206,7 +226,7 @@ export default function ProjectBoardPage() {
                     <KanbanBoard
                         projectId={params.id}
                         sprintId={selectedSprintId}
-                        onTicketClick={(ticket) => setSelectedTicket(ticket)}
+                        onTicketClick={(ticket) => router.push(`/projects/${params.id}?ticketId=${ticket._id}`)}
                         searchQuery={searchQuery}
                     />
                 ) : (
@@ -216,12 +236,12 @@ export default function ProjectBoardPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                         </div>
-                        <p className="font-bold text-sm mb-6">Start a sprint to enable the board view.</p>
+                        <p className="font-bold text-sm mb-6">Start a cycle to enable the board view.</p>
                         <button
                             onClick={() => router.push(`/projects/${project._id}/backlog`)}
                             className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:shadow-primary/30 transition-all"
                         >
-                            Go to Backlog
+                            Go to Planner
                         </button>
                     </div>
                 )}
@@ -238,7 +258,10 @@ export default function ProjectBoardPage() {
 
             <TicketDetailModal
                 isOpen={!!selectedTicket}
-                onClose={() => setSelectedTicket(null)}
+                onClose={() => {
+                    setSelectedTicket(null);
+                    router.push(`/projects/${params.id}`);
+                }}
                 ticket={selectedTicket}
                 members={project.members || []}
                 projectId={params.id}

@@ -170,6 +170,38 @@ export default function TicketDetailModal({ isOpen, onClose, ticket, members, pr
         onConfirm: () => { },
     });
 
+    const [isWatched, setIsWatched] = useState(false);
+
+    useEffect(() => {
+        if (ticket && user) {
+            setIsWatched(ticket.watchers?.includes(user._id) || false);
+        }
+    }, [ticket, user]);
+
+    const handleToggleWatch = async () => {
+        try {
+            const res = await api.patch(`/api/tickets/${ticket._id}/watch`);
+            const updatedWatchers = res.data.data.watchers || [];
+            const isNowWatching = updatedWatchers.some((id: string) => String(id) === String(user?._id));
+            setIsWatched(isNowWatching);
+            toast.success(isNowWatching ? 'You are now watching this ticket' : 'You stopped watching this ticket');
+        } catch (err) {
+            console.error(err);
+            toast.error('Failed to update watch status');
+        }
+    };
+
+    const handleShare = () => {
+        // Construct a shareable URL if possible, otherwise current URL
+        // Assuming the app checks for ?ticketId on load, or just sharing the project view
+        const url = `${window.location.origin}/projects/${projectId}?ticketId=${ticket._id}`;
+        navigator.clipboard.writeText(url).then(() => {
+            toast.success('Link copied to clipboard');
+        }).catch(() => {
+            toast.error('Failed to copy link');
+        });
+    };
+
     const handleDeleteTicket = () => {
         setConfirmationModal({
             isOpen: true,
@@ -194,10 +226,17 @@ export default function TicketDetailModal({ isOpen, onClose, ticket, members, pr
 
     return (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4 animate-in fade-in duration-200">
-            <div className="bg-white w-full max-w-6xl h-[90vh] rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Mobile Close Button */}
+            <button
+                onClick={onClose}
+                className="md:hidden absolute top-6 right-6 z-[250] p-2 bg-white/50 hover:bg-white backdrop-blur-md rounded-full text-slate-800 shadow-sm border border-slate-200/50 transition-all hover:scale-105 active:scale-95"
+            >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <div className="bg-white w-full max-w-6xl md:h-[90vh] h-full md:rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden md:overflow-hidden overflow-y-auto animate-in zoom-in-95 duration-200">
 
                 {/* Main Content */}
-                <div className="flex-1 flex flex-col p-6 md:p-8 overflow-y-auto border-r border-slate-100 bg-white custom-scrollbar min-h-0">
+                <div className="w-full flex-none md:flex-1 flex flex-col p-6 md:p-8 md:overflow-y-auto border-r border-slate-100 bg-white custom-scrollbar md:min-h-0 shrink-0 md:h-full h-auto">
                     <header className="mb-8 pr-12 md:pr-0">
                         <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">
                             <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600 shadow-sm">{ticket.type || 'Task'}</span>
@@ -293,6 +332,24 @@ export default function TicketDetailModal({ isOpen, onClose, ticket, members, pr
                             <div ref={commentsEndRef} />
                         </div>
 
+                        {commentAttachments.length > 0 && (
+                            <div className="flex gap-2 mb-3 p-2 bg-slate-50 rounded-xl border border-slate-100 overflow-x-auto">
+                                {commentAttachments.map((url, i) => (
+                                    <div key={i} className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden border border-slate-200 group">
+                                        <img src={url} alt="Attached" className="w-full h-full object-cover" />
+                                        <button
+                                            type="button"
+                                            onClick={() => setCommentAttachments(prev => prev.filter((_, idx) => idx !== i))}
+                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 transition-colors shadow-sm z-10"
+                                            title="Remove image"
+                                        >
+                                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
                         <form
                             onSubmit={handlePostComment}
                             className="flex gap-4 p-4 bg-white border-2 border-slate-200 rounded-2xl shadow-md focus-within:border-primary/40 transition-all mb-4"
@@ -338,27 +395,11 @@ export default function TicketDetailModal({ isOpen, onClose, ticket, members, pr
                                 </Button>
                             </div>
                         </form>
-                        {commentAttachments.length > 0 && (
-                            <div className="flex gap-2 mb-4 p-2 bg-slate-50 rounded-xl border border-slate-100 overflow-x-auto">
-                                {commentAttachments.map((url, i) => (
-                                    <div key={i} className="relative w-12 h-12 flex-shrink-0 rounded-lg overflow-hidden border border-slate-200">
-                                        <img src={url} alt="Attached" className="w-full h-full object-cover" />
-                                        <button
-                                            type="button"
-                                            onClick={() => setCommentAttachments(prev => prev.filter((_, idx) => idx !== i))}
-                                            className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
-                                        >
-                                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
                     </div>
                 </div>
 
                 {/* Sidebar Details */}
-                <div className="w-full md:w-[360px] bg-white flex flex-col h-full border-l border-slate-100 overflow-hidden shrink-0 relative z-10 min-h-0">
+                <div className="w-full flex-none md:w-[360px] bg-white flex flex-col md:h-full h-auto border-l border-slate-100 md:overflow-hidden shrink-0 relative z-10 md:min-h-0">
                     {/* Fixed Header */}
                     <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-20">
                         <div className="flex gap-1">
@@ -376,8 +417,24 @@ export default function TicketDetailModal({ isOpen, onClose, ticket, members, pr
                                     </svg>
                                 </Button>
                             )}
-                            <Button size="sm" variant="ghost" className="w-8 h-8 p-0 rounded-lg hover:bg-slate-100 text-slate-400 group"><svg className="w-4 h-4 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></Button>
-                            <Button size="sm" variant="ghost" className="w-8 h-8 p-0 rounded-lg hover:bg-slate-100 text-slate-400 group"><svg className="w-4 h-4 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg></Button>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={handleToggleWatch}
+                                title={isWatched ? 'Stop watching' : 'Watch ticket'}
+                                className={`w-8 h-8 p-0 rounded-lg hover:bg-slate-100 group transition-colors ${isWatched ? 'bg-primary/5 text-primary' : 'text-slate-400'}`}
+                            >
+                                <svg className={`w-4 h-4 transition-colors ${isWatched ? 'text-primary fill-primary/20' : 'group-hover:text-primary'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={handleShare}
+                                title="Copy permalink"
+                                className="w-8 h-8 p-0 rounded-lg hover:bg-slate-100 text-slate-400 group"
+                            >
+                                <svg className="w-4 h-4 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                            </Button>
                         </div>
                         <button onClick={onClose} className="w-8 h-8 flex items-center justify-center hover:bg-slate-200 rounded-lg transition-all text-slate-400 hover:text-slate-600" aria-label="Close">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -589,6 +646,23 @@ export default function TicketDetailModal({ isOpen, onClose, ticket, members, pr
 
                             {/* Input Area At Bottom of Modal */}
                             <div className="p-8 bg-white border-t border-slate-50">
+                                {commentAttachments.length > 0 && (
+                                    <div className="flex gap-3 mb-4 p-3 bg-slate-100 rounded-2xl border border-slate-200 overflow-x-auto">
+                                        {commentAttachments.map((url, i) => (
+                                            <div key={i} className="relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 border-white shadow-sm group">
+                                                <img src={url} alt="Attached" className="w-full h-full object-cover" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setCommentAttachments(prev => prev.filter((_, idx) => idx !== i))}
+                                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-md z-10"
+                                                    title="Remove image"
+                                                >
+                                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                                 <form
                                     onSubmit={handlePostComment}
                                     className="flex gap-4 p-4 bg-slate-50 border-2 border-slate-200 rounded-[24px] focus-within:border-primary/40 focus-within:bg-white transition-all shadow-inner"
@@ -634,22 +708,6 @@ export default function TicketDetailModal({ isOpen, onClose, ticket, members, pr
                                         </Button>
                                     </div>
                                 </form>
-                                {commentAttachments.length > 0 && (
-                                    <div className="flex gap-3 mt-4 p-3 bg-slate-100 rounded-2xl border border-slate-200 overflow-x-auto">
-                                        {commentAttachments.map((url, i) => (
-                                            <div key={i} className="relative w-16 h-16 flex-shrink-0 rounded-xl overflow-hidden border-2 border-white shadow-sm">
-                                                <img src={url} alt="Attached" className="w-full h-full object-cover" />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setCommentAttachments(prev => prev.filter((_, idx) => idx !== i))}
-                                                    className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
-                                                >
-                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </div>

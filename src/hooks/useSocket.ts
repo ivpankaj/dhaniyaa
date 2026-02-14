@@ -7,7 +7,7 @@ export const useSocket = (projectId: string) => {
     useEffect(() => {
         if (!projectId) return;
 
-        const socketIo = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080');
+        const socketIo = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000');
 
         socketIo.on('connect', () => {
             console.log('Connected to socket', socketIo.id);
