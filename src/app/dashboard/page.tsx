@@ -11,6 +11,7 @@ import CreateOrganizationModal from '@/components/CreateOrganizationModal';
 import { InviteMemberModal } from '@/components/InviteMemberModal';
 import { SettingsModal } from '@/components/SettingsModal';
 import { ConfirmationModal } from '@/components/ConfirmationModal';
+import AdrakChat from '@/components/AdrakChat';
 
 import { toast } from 'sonner';
 
@@ -541,6 +542,9 @@ export default function DashboardPage() {
                     title={confirmationModal.title}
                     message={confirmationModal.message}
                 />
+
+                {/* Adrak AI Chat Widget */}
+                <AdrakChat />
             </main>
         </div>
     );

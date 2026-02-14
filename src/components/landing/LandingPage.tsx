@@ -11,7 +11,9 @@ import {
     ArrowRight,
     MessageCircle,
     Layers,
-    ChevronRight
+    ChevronRight,
+    Bot,
+    Sparkles
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
@@ -368,6 +370,67 @@ export default function LandingPage() {
                                 </div>
                             ))}
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* AI Showcase Section */}
+            <section className="py-24 relative overflow-hidden">
+                <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
+                    <div className="order-2 md:order-1 relative rounded-2xl border border-white/10 overflow-hidden shadow-2xl group">
+                        <div className="absolute inset-0 bg-gradient-to-tr from-amber-600/20 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                        <img
+                            src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1000"
+                            alt="AI Assistant"
+                            className="w-full h-auto object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+                        />
+                        <div className="absolute inset-0 bg-slate-900/60"></div>
+                        {/* Mock Chat UI */}
+                        <div className="absolute inset-0 flex items-center justify-center p-8">
+                            <div className="w-full max-w-sm glass rounded-2xl p-4 flex flex-col gap-3 border border-white/20">
+                                <div className="flex items-center gap-3 border-b border-white/10 pb-3">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-violet-600 to-emerald-500 flex items-center justify-center">
+                                        <Bot className="w-5 h-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <div className="text-white font-bold text-sm">Adrak AI</div>
+                                        <div className="text-emerald-400 text-[10px] font-bold">Online</div>
+                                    </div>
+                                </div>
+                                <div className="bg-white/5 rounded-lg p-3 rounded-tl-none text-xs text-slate-300">
+                                    How do I create a new sprint?
+                                </div>
+                                <div className="bg-violet-600/80 rounded-lg p-3 rounded-tr-none text-xs text-white">
+                                    Go to your project board, click the "Sprints" tab, and hit "Create Sprint". I can help you set up the dates!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="order-1 md:order-2">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 text-xs font-black uppercase tracking-wider mb-6 border border-amber-500/20">
+                            <Sparkles className="w-3 h-3 animate-pulse" />
+                            Meet Adrak
+                        </div>
+                        <h3 className="text-4xl md:text-5xl font-black text-white mb-6">
+                            Your Intelligent <span className="text-amber-400">Project Assistant</span>
+                        </h3>
+                        <p className="text-lg text-slate-400 mb-8 leading-relaxed">
+                            Stuck on a feature? Need to find a setting? Adrak is your built-in AI companion that knows Dhaniyaa inside out. Get instant answers, support, and guidance without leaving your dashboard.
+                        </p>
+                        <ul className="space-y-4">
+                            {[
+                                'Instant 24/7 Support',
+                                'Context-aware guidance',
+                                'Powered by Gemini AI'
+                            ].map((item, i) => (
+                                <li key={i} className="flex items-center gap-3 text-slate-300 font-medium">
+                                    <div className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center">
+                                        <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+                                    </div>
+                                    {item}
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                 </div>
             </section>
