@@ -21,7 +21,7 @@ const columns = {
     'Done': { title: 'Done', items: [] as Ticket[] },
 };
 
-export default function KanbanBoard({ projectId, sprintId, onTicketClick, searchQuery, refreshTrigger }: { projectId: string; sprintId?: string | null; onTicketClick: (ticket: any) => void; searchQuery?: string; refreshTrigger?: number }) {
+export default function KanbanBoard({ projectId, sprintId, onTicketClick, searchQuery, refreshTrigger, loadingTicketId }: { projectId: string; sprintId?: string | null; onTicketClick: (ticket: any) => void; searchQuery?: string; refreshTrigger?: number; loadingTicketId?: string | null }) {
     const [boardData, setBoardData] = useState(columns);
     const [loading, setLoading] = useState(true);
     const socket = useSocket(projectId);
@@ -284,10 +284,15 @@ export default function KanbanBoard({ projectId, sprintId, onTicketClick, search
                                                         }
                                                     }}
                                                     className={`
-                                                        bg-white p-5 rounded-[20px] border-2 border-slate-50 shadow-sm transition-all duration-300 cursor-pointer
+                                                        bg-white p-5 rounded-[20px] border-2 border-slate-50 shadow-sm transition-all duration-300 cursor-pointer relative overflow-hidden
                                                         ${snapshot.isDragging ? 'shadow-2xl -rotate-1 scale-[1.02] z-50 border-primary ring-4 ring-primary/5' : 'hover:shadow-lg hover:border-primary/20 hover:translate-y-[-2px]'}
                                                     `}
                                                 >
+                                                    {loadingTicketId === ticket._id && (
+                                                        <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 backdrop-blur-[1px]">
+                                                            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                                        </div>
+                                                    )}
                                                     <div className="flex items-start justify-between mb-3">
                                                         <p className="text-sm font-bold text-slate-800 leading-base flex-1">{ticket.title}</p>
                                                         {/* Drag handle */}

@@ -119,10 +119,10 @@ export default function LoginPage() {
                 <div className="w-full max-w-md">
                     {/* Mobile Logo */}
                     <div className="lg:hidden flex items-center gap-3 mb-8">
-                        <div className="w-12 h-12 bg-gradient-to-br from-violet-600 to-emerald-500 rounded-2xl flex items-center justify-center p-2">
+                        <div className="w-24 h-24 rounded-2xl flex items-center justify-center p-2">
                             <DhaniyaaLogo className="w-full h-full" />
                         </div>
-                        <h1 className="text-2xl font-black text-slate-800">Dhaniyaa</h1>
+                        <h1 className="text-2xl font-black text-slate-800 -ml-9">Dhaniyaa</h1>
                     </div>
 
                     <div className="bg-white p-8 sm:p-10 rounded-3xl shadow-xl border border-slate-100">

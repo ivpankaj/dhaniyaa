@@ -23,6 +23,7 @@ export default function ProjectBoardPage() {
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [selectedTicket, setSelectedTicket] = useState<any>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [loadingTicketId, setLoadingTicketId] = useState<string | null>(null);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     const handleRefresh = () => {
@@ -44,10 +45,14 @@ export default function ProjectBoardPage() {
                     })
                     .catch(() => {
                         setSelectedTicket(null);
+                    })
+                    .finally(() => {
+                        setLoadingTicketId(null);
                     });
             }
         } else if (!ticketIdParam) {
             setSelectedTicket(null);
+            setLoadingTicketId(null);
         }
     }, [ticketIdParam, project, params.id, selectedTicket?._id]);
 
@@ -233,9 +238,13 @@ export default function ProjectBoardPage() {
                     <KanbanBoard
                         projectId={params.id}
                         sprintId={selectedSprintId}
-                        onTicketClick={(ticket) => router.push(`/projects/${params.id}?ticketId=${ticket._id}`)}
+                        onTicketClick={(ticket) => {
+                            setLoadingTicketId(ticket._id);
+                            router.push(`/projects/${params.id}?ticketId=${ticket._id}`);
+                        }}
                         searchQuery={searchQuery}
                         refreshTrigger={refreshTrigger}
+                        loadingTicketId={loadingTicketId}
                     />
                 ) : (
                     <div className="h-full mx-4 border-2 border-dashed border-slate-200 rounded-2xl bg-white/50 mb-4 overflow-hidden relative text-slate-400">
