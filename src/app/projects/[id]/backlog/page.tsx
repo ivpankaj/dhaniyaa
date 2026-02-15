@@ -179,7 +179,7 @@ export default function BacklogPage() {
                     </div>
                     <div>
                         <h1 className="text-sm font-bold tracking-tight">{project?.name || 'Project'}</h1>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{project?.key || 'Software Project'}</p>
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{project?.type || 'SOFTWARE PROJECT'}</p>
                     </div>
                 </div>
                 <div className="ml-auto flex items-center gap-2">

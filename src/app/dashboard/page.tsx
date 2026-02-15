@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import Image from 'next/image';
+import DhaniyaaLogo from '@/components/DhaniyaaLogo';
 import CreateProjectModal from '@/components/CreateProjectModal';
 import NotificationDropdown from '@/components/NotificationDropdown';
 import CreateOrganizationModal from '@/components/CreateOrganizationModal';
@@ -40,7 +41,7 @@ export default function DashboardPage() {
             onConfirm: async () => {
                 try {
                     await api.delete(`/api/projects/${projectId}`);
-                    setProjects(prev => prev.filter(p => p._id !== projectId));
+                    setRefreshTrigger(prev => prev + 1);
                     toast.success('Project deleted successfully');
                 } catch (err: any) {
                     toast.error(err.response?.data?.message || 'Failed to delete project');
@@ -91,6 +92,24 @@ export default function DashboardPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [viewMode, setViewMode] = useState<'org' | 'shared'>('org');
 
+    // Search and Pagination State
+    const [searchQuery, setSearchQuery] = useState('');
+    const [page, setPage] = useState(1);
+    const [limit] = useState(9); // 9 items per grid page looks good
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalProjects, setTotalProjects] = useState(0);
+
+    // Debounce search
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
     useEffect(() => {
         const fetchOrgs = async () => {
             try {
@@ -126,17 +145,24 @@ export default function DashboardPage() {
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                let url = '/api/projects';
-                if (viewMode === 'org' && selectedOrgId) {
-                    url = `/api/projects?organizationId=${selectedOrgId}`;
-                } else if (viewMode === 'shared') {
-                    url = '/api/projects'; // Back-end handles "my projects" if no orgId
-                } else {
-                    return; // Should not happen ideally
+                let url = `/api/projects?page=${page}&limit=${limit}`;
+
+                if (debouncedSearch) {
+                    url += `&search=${encodeURIComponent(debouncedSearch)}`;
                 }
+
+                if (viewMode === 'org' && selectedOrgId) {
+                    url += `&organizationId=${selectedOrgId}`;
+                }
+                // else if shared, no orgId param needed as it defaults to user's projects in backend
 
                 const res = await api.get(url);
                 setProjects(res.data.data);
+
+                if (res.data.pagination) {
+                    setTotalPages(res.data.pagination.totalPages);
+                    setTotalProjects(res.data.pagination.total);
+                }
             } catch (err) {
                 console.error('Failed to fetch projects');
             } finally {
@@ -148,11 +174,12 @@ export default function DashboardPage() {
             setLoading(true);
             fetchProjects();
         }
-    }, [selectedOrgId, viewMode]);
+    }, [selectedOrgId, viewMode, page, limit, debouncedSearch, refreshTrigger]);
 
     const handleCreateProject = async (projectData: any) => {
-        const res = await api.post('/api/projects', projectData);
-        setProjects([...projects, res.data.data]);
+        await api.post('/api/projects', projectData);
+        setPage(1); // Go to first page to see new project
+        setRefreshTrigger(prev => prev + 1);
     };
 
     const handleCreateOrg = async (orgData: any) => {
@@ -168,9 +195,7 @@ export default function DashboardPage() {
             setInvitations(invitations.filter(i => i._id !== id));
             if (selectedOrgId || viewMode === 'shared') {
                 // Refresh projects
-                const url = (viewMode === 'org' && selectedOrgId) ? `/api/projects?organizationId=${selectedOrgId}` : '/api/projects';
-                const res = await api.get(url);
-                setProjects(res.data.data);
+                setRefreshTrigger(prev => prev + 1);
             }
         } catch (error) {
             console.error('Failed to accept invitation');
@@ -198,11 +223,11 @@ export default function DashboardPage() {
 
             {/* Sidebar */}
             <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground flex flex-col shrink-0 overflow-hidden transition-transform duration-300 transform lg:relative lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-                <div className="p-6 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded flex items-center justify-center shrink-0 shadow-sm transition-transform hover:scale-105 relative overflow-hidden">
-                        <Image src="/logo.png" alt="Dhaniyaa" fill className="object-contain" />
+                <div className="p-2 flex items-center gap-3">
+                    <div className="w-24 h-24 rounded flex items-center justify-center shrink-0 shadow-sm transition-transform hover:scale-105 relative overflow-hidden">
+                        <DhaniyaaLogo className="w-full h-full" />
                     </div>
-                    <h1 className="text-xl font-black tracking-tighter truncate">Dhaniyaa</h1>
+                    <h1 className="text-xl font-black tracking-tighter truncate -ml-9">Dhaniyaa</h1>
                 </div>
 
                 <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
@@ -326,14 +351,6 @@ export default function DashboardPage() {
                         <NotificationDropdown />
                         {selectedOrgId && (
                             <>
-                                {selectedOrgId && (user?.role === 'OrganizationOwner' || projects.some(p => p.organizationId === selectedOrgId && (p.createdBy === user?._id || p.members?.find((m: any) => m.userId === user?._id && m.role === 'ProjectAdmin')))) && (
-                                    <button
-                                        onClick={() => setIsInviteModalOpen(true)}
-                                        className="hidden md:flex px-4 py-2 text-slate-500 font-bold text-sm hover:bg-slate-100 rounded transition-all"
-                                    >
-                                        Invite Members
-                                    </button>
-                                )}
                                 <button
                                     onClick={() => setIsModalOpen(true)}
                                     className="bg-primary text-primary-foreground px-3 sm:px-5 py-2 rounded font-bold text-xs sm:text-sm hover:translate-y-[-1px] active:translate-y-[1px] transition-all shadow-[0_4px_14px_0_rgba(0,82,204,0.39)] whitespace-nowrap"
@@ -348,8 +365,27 @@ export default function DashboardPage() {
 
                 <div className="flex-1 overflow-auto p-4 md:p-8 custom-scrollbar">
                     <section className="max-w-7xl mx-auto">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                            <h2 className="text-xl font-bold hidden md:block">Projects</h2>
+                            <div className="relative w-full md:w-96">
+                                <input
+                                    type="text"
+                                    placeholder="Search projects by name or description..."
+                                    value={searchQuery}
+                                    onChange={(e) => {
+                                        setSearchQuery(e.target.value);
+                                        setPage(1); // Reset to first page on search
+                                    }}
+                                    className="w-full bg-white border border-border px-10 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm"
+                                />
+                                <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                        </div>
+
                         {loading ? (
-                            <div className="flex flex-col items-center justify-center py-32 gap-6">
+                            <div className="flex flex-col items-center justify-center py-16 md:py-32 gap-6">
                                 <div className="relative">
                                     <div className="w-12 h-12 rounded-full border-4 border-primary/20 animate-pulse"></div>
                                     <div className="absolute inset-0 w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
@@ -358,7 +394,7 @@ export default function DashboardPage() {
                             </div>
                         ) : (
                             <>
-                                {invitations.length > 0 && (
+                                {invitations.length > 0 && page === 1 && !searchQuery && (
                                     <div className="mb-10 animate-in slide-in-from-top-4 duration-500">
                                         <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                                             <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
@@ -398,8 +434,8 @@ export default function DashboardPage() {
                                         </div>
                                     </div>
                                 )}
-                                {(!selectedOrgId && viewMode !== 'shared') ? (
-                                    <div className="flex flex-col items-center justify-center py-32 text-center bg-white rounded-2xl border border-border shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                                {(!selectedOrgId && viewMode !== 'shared' && !searchQuery) ? (
+                                    <div className="flex flex-col items-center justify-center py-16 md:py-32 text-center bg-white rounded-2xl border border-border shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                                         <div className="w-24 h-24 bg-accent rounded-3xl flex items-center justify-center mb-8 rotate-3 shadow-inner">
                                             <svg className="w-12 h-12 text-primary -rotate-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-7h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -415,83 +451,108 @@ export default function DashboardPage() {
                                         </button>
                                     </div>
                                 ) : projects.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-                                        {projects.map((project: any) => (
-                                            <div
-                                                key={project._id}
-                                                onClick={() => router.push(`/projects/${project._id}`)}
-                                                className="bg-white p-7 rounded-2xl border border-border hover:border-primary cursor-pointer transition-all hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] group relative flex flex-col min-h-[220px]"
-                                            >
-                                                <div className="absolute top-0 left-0 w-2 h-full bg-primary rounded-l-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-                                                <div className="flex items-start justify-between mb-6">
-                                                    <div className="w-14 h-14 bg-accent rounded-2xl flex items-center justify-center shadow-sm group-hover:rotate-6 transition-transform">
-                                                        <span className="text-primary font-black text-2xl">{project.name.charAt(0).toUpperCase()}</span>
+                                    <>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 mb-8">
+                                            {projects.map((project: any) => (
+                                                <div
+                                                    key={project._id}
+                                                    onClick={() => router.push(`/projects/${project._id}`)}
+                                                    className="bg-white p-7 rounded-2xl border border-border hover:border-primary cursor-pointer transition-all hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] group relative flex flex-col min-h-[220px]"
+                                                >
+                                                    <div className="absolute top-0 left-0 w-2 h-full bg-primary rounded-l-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                                                    <div className="flex items-start justify-between mb-6">
+                                                        <div className="w-14 h-14 bg-accent rounded-2xl flex items-center justify-center shadow-sm group-hover:rotate-6 transition-transform">
+                                                            <span className="text-primary font-black text-2xl">{project.name.charAt(0).toUpperCase()}</span>
+                                                        </div>
+                                                        <div className="flex flex-col items-end">
+                                                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">Key: {project.key || 'TF'}</span>
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex flex-col items-end">
-                                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">Key: {project.key || 'TF'}</span>
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
-                                                    </div>
-                                                </div>
-                                                <h4 className="text-xl font-extrabold mb-3 group-hover:text-primary transition-colors tracking-tight">{project.name}</h4>
-                                                <p className="text-muted-foreground text-sm mb-8 line-clamp-2 leading-relaxed h-10 font-medium">{project.description || 'Elevating team productivity with streamlined workflows.'}</p>
+                                                    <h4 className="text-xl font-extrabold mb-3 group-hover:text-primary transition-colors tracking-tight">{project.name}</h4>
+                                                    <p className="text-muted-foreground text-sm mb-8 line-clamp-2 leading-relaxed h-10 font-medium">{project.description || 'Elevating team productivity with streamlined workflows.'}</p>
 
-                                                <div className="mt-auto flex items-center justify-between pt-5 border-t border-border">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="flex -space-x-2.5">
-                                                            {[1, 2, 3].map(i => (
-                                                                <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-400">
-                                                                    {i === 3 ? (project.members?.length || 1) : ''}
+                                                    <div className="mt-auto flex items-center justify-between pt-5 border-t border-border">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex -space-x-2.5">
+                                                                {[1, 2, 3].map(i => (
+                                                                    <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-400">
+                                                                        {i === 3 ? (project.members?.length || 1) : ''}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                            <span className="text-xs font-bold text-muted-foreground">{project.members?.length || 1} members</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            {(project.members?.find((m: any) => m.userId === user?._id)?.role === 'ProjectAdmin' || project.createdBy === user?._id || user?.role === 'OrganizationOwner') && (
+                                                                <div className="w-8 h-8 rounded-full bg-accent text-primary flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all hover:bg-primary hover:text-white"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setInviteProject(project);
+                                                                        setIsInviteModalOpen(true);
+                                                                    }}
+                                                                    title="Invite Members"
+                                                                >
+                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                                                    </svg>
                                                                 </div>
-                                                            ))}
-                                                        </div>
-                                                        <span className="text-xs font-bold text-muted-foreground">{project.members?.length || 1} members</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        {(project.members?.find((m: any) => m.userId === user?._id)?.role === 'ProjectAdmin' || project.createdBy === user?._id || user?.role === 'OrganizationOwner') && (
-                                                            <div className="w-8 h-8 rounded-full bg-accent text-primary flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all hover:bg-primary hover:text-white"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setInviteProject(project);
-                                                                    setIsInviteModalOpen(true);
-                                                                }}
-                                                                title="Invite Members"
-                                                            >
+                                                            )}
+                                                            <div className="w-8 h-8 rounded-full bg-accent text-primary flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 translate-x-0 lg:translate-x-4 lg:group-hover:translate-x-0 transition-all">
                                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                                 </svg>
                                                             </div>
-                                                        )}
-                                                        <div className="w-8 h-8 rounded-full bg-accent text-primary flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 translate-x-0 lg:translate-x-4 lg:group-hover:translate-x-0 transition-all">
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                            </svg>
+                                                            {project.createdBy === user?._id && (
+                                                                <div className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 translate-x-0 lg:translate-x-4 lg:group-hover:translate-x-0 transition-all hover:bg-red-500 hover:text-white"
+                                                                    onClick={(e) => handleDeleteProject(project._id, e)}
+                                                                    title="Delete Project"
+                                                                >
+                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                    </svg>
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                        {project.createdBy === user?._id && (
-                                                            <div className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 translate-x-0 lg:translate-x-4 lg:group-hover:translate-x-0 transition-all hover:bg-red-500 hover:text-white"
-                                                                onClick={(e) => handleDeleteProject(project._id, e)}
-                                                                title="Delete Project"
-                                                            >
-                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                </svg>
-                                                            </div>
-                                                        )}
                                                     </div>
                                                 </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Pagination Controls */}
+                                        <div className="flex items-center justify-between border-t border-border pt-4">
+                                            <p className="text-sm text-slate-500 font-bold">
+                                                Page {page} of {totalPages} <span className="text-slate-400 font-normal ml-1">({totalProjects} total)</span>
+                                            </p>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                                                    disabled={page === 1}
+                                                    className="px-4 py-2 border border-border rounded-lg text-sm font-bold text-slate-600 disabled:opacity-50 hover:bg-slate-50 transition-colors"
+                                                >
+                                                    Previous
+                                                </button>
+                                                <button
+                                                    onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+                                                    disabled={page >= totalPages}
+                                                    className="px-4 py-2 border border-border rounded-lg text-sm font-bold text-slate-600 disabled:opacity-50 hover:bg-slate-50 transition-colors"
+                                                >
+                                                    Next
+                                                </button>
                                             </div>
-                                        ))}
-                                    </div>
+                                        </div>
+                                    </>
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center py-32 bg-white rounded-2xl border border-dashed border-border shadow-sm text-center">
+                                    <div className="flex flex-col items-center justify-center py-16 md:py-32 bg-white rounded-2xl border border-dashed border-border shadow-sm text-center">
                                         <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-6">
                                             <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                                             </svg>
                                         </div>
                                         <p className="text-slate-500 mb-8 font-bold tracking-tight">
-                                            {viewMode === 'shared' ? "You haven't joined any projects yet. Create Organisation to create a Project" : "Your organization is ready for its first project."}
+                                            {searchQuery ? `No projects found matching "${searchQuery}"` : (viewMode === 'shared' ? "You haven't joined any projects yet. Create Organisation to create a Project" : "Your organization is ready for its first project.")}
                                         </p>
-                                        {viewMode !== 'shared' && (
+                                        {(viewMode !== 'shared' && !searchQuery) && (
                                             <button
                                                 onClick={() => setIsModalOpen(true)}
                                                 className="bg-primary text-primary-foreground px-8 py-3 rounded-xl font-black hover:shadow-xl transition-all"

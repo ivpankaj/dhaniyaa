@@ -105,8 +105,9 @@ export default function TicketDetailModal({ isOpen, onClose, ticket, members, pr
         const oldStatus = status;
         setStatus(newStatus);
         try {
-            await api.patch(`/api/tickets/${ticket._id}/status`, { status: newStatus });
+            const res = await api.patch(`/api/tickets/${ticket._id}/status`, { status: newStatus });
             toast.success(`Status updated to ${newStatus}`);
+            if (onUpdate && res.data.data) onUpdate(res.data.data);
         } catch (err) {
             toast.error('Failed to update status');
             setStatus(oldStatus);
@@ -115,7 +116,8 @@ export default function TicketDetailModal({ isOpen, onClose, ticket, members, pr
 
     const handleUpdateTicket = async (updates: any) => {
         try {
-            await api.patch(`/api/tickets/${ticket._id}`, updates);
+            const res = await api.patch(`/api/tickets/${ticket._id}`, updates);
+            if (onUpdate && res.data.data) onUpdate(res.data.data);
         } catch (err) {
             toast.error('Failed to update ticket');
         }

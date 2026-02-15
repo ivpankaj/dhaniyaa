@@ -12,6 +12,7 @@ interface CreateProjectModalProps {
 export default function CreateProjectModal({ isOpen, onClose, onCreate, orgId }: CreateProjectModalProps) {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [type, setType] = useState('Software Project');
     const [loading, setLoading] = useState(false);
 
     if (!isOpen) return null;
@@ -22,10 +23,11 @@ export default function CreateProjectModal({ isOpen, onClose, onCreate, orgId }:
 
         setLoading(true);
         try {
-            await onCreate({ name, description, organizationId: orgId });
+            await onCreate({ name, description, type, organizationId: orgId });
             onClose();
             setName('');
             setDescription('');
+            setType('Software Project');
         } catch (err) {
             console.error(err);
         } finally {
@@ -71,6 +73,28 @@ export default function CreateProjectModal({ isOpen, onClose, onCreate, orgId }:
                                 className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-primary focus:bg-white outline-none transition-all text-slate-700 font-medium"
                                 placeholder="What is this project about?"
                             />
+                        </div>
+
+                        <div>
+                            <label className="block text-[11px] font-black uppercase tracking-widest text-slate-500 mb-2">Project Type</label>
+                            <div className="relative">
+                                <select
+                                    value={type}
+                                    onChange={(e) => setType(e.target.value)}
+                                    className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-primary focus:bg-white outline-none transition-all font-bold text-slate-800 appearance-none cursor-pointer"
+                                >
+                                    <option value="Software Project">Software Project</option>
+                                    <option value="Marketing Campaign">Marketing Campaign</option>
+                                    <option value="Business Project">Business Project</option>
+                                    <option value="Content Calendar">Content Calendar</option>
+                                    <option value="Personal Board">Personal Board</option>
+                                </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

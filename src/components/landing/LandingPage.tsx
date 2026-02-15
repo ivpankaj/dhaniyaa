@@ -18,10 +18,21 @@ import {
 import { useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import DhaniyaaLogo from '@/components/DhaniyaaLogo';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function LandingPage() {
     const [scrolled, setScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    const { user, loading } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!loading && user) {
+            router.push('/dashboard');
+        }
+    }, [user, loading, router]);
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -41,8 +52,8 @@ export default function LandingPage() {
 
                 <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-3 group cursor-pointer">
-                        <DhaniyaaLogo className="w-10 h-10 group-hover:scale-110 transition-transform duration-300" />
-                        <span className="text-2xl font-black tracking-tighter text-white">Dhaniyaa</span>
+                        <DhaniyaaLogo className="w-20 h-20 group-hover:scale-110 transition-transform duration-300" />
+                        <span className="text-2xl font-black tracking-tighter text-white -ml-9">Dhaniyaa</span>
                     </Link>
 
                     {/* Desktop Menu */}
@@ -421,7 +432,7 @@ export default function LandingPage() {
                             {[
                                 'Instant 24/7 Support',
                                 'Context-aware guidance',
-                                'Powered by Gemini AI'
+                                'Powered by Best AI tools'
                             ].map((item, i) => (
                                 <li key={i} className="flex items-center gap-3 text-slate-300 font-medium">
                                     <div className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center">
@@ -455,8 +466,8 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-10">
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center gap-3">
-                            <DhaniyaaLogo className="w-8 h-8" />
-                            <span className="text-xl font-black tracking-tighter text-white">Dhaniyaa</span>
+                            <DhaniyaaLogo className="w-20 h-20" />
+                            <span className="text-xl font-black tracking-tighter text-white -ml-9">Dhaniyaa</span>
                         </div>
                         <p className="text-slate-500 text-sm font-bold">
                             Proudly built by <a href="https://cookmytech.site" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300 transition-colors">Cookmytech</a>.

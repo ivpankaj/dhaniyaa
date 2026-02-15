@@ -88,10 +88,10 @@ export default function RegisterPage() {
                 <div className="relative z-10 flex flex-col justify-center px-16 text-white">
                     <div className="mb-8">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30 p-2">
+                            <div className="w-24 h-24 rounded-2xl flex items-center justify-center p-2">
                                 <DhaniyaaLogo className="w-full h-full" />
                             </div>
-                            <h1 className="text-4xl font-black tracking-tight">Dhaniyaa</h1>
+                            <h1 className="text-4xl font-black tracking-tight -ml-9">Dhaniyaa</h1>
                         </div>
                         <h2 className="text-5xl font-black leading-tight mb-6">
                             Start your journey<br />to better projects
@@ -119,14 +119,14 @@ export default function RegisterPage() {
                             <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
                                 <Clock className="w-5 h-5" />
                             </div>
-                            <span className="text-lg font-semibold">Free 14-day trial</span>
+                            <span className="text-lg font-semibold">Free Forever</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Right Side - Register Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-slate-50">
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-4 md:p-8 bg-slate-50">
                 <div className="w-full max-w-md">
                     {/* Mobile Logo */}
                     <div className="lg:hidden flex items-center gap-3 mb-8">
@@ -136,7 +136,7 @@ export default function RegisterPage() {
                         <h1 className="text-2xl font-black text-slate-800">Dhaniyaa</h1>
                     </div>
 
-                    <div className="bg-white p-8 sm:p-10 rounded-3xl shadow-xl border border-slate-100">
+                    <div className="bg-white p-6 md:p-10 rounded-3xl shadow-xl border border-slate-100">
                         <div className="mb-8">
                             <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-2">Create workspace</h2>
                             <p className="text-slate-500 font-medium">Start your free Dhaniyaa workspace</p>
@@ -161,7 +161,7 @@ export default function RegisterPage() {
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     className="w-full bg-slate-50 border-2 border-slate-200 px-4 py-3.5 rounded-xl focus:outline-none focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100 transition-all font-medium text-slate-800"
-                                    placeholder="John Doe"
+                                    placeholder="Your Name"
                                     required
                                 />
                             </div>
@@ -173,7 +173,7 @@ export default function RegisterPage() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="w-full bg-slate-50 border-2 border-slate-200 px-4 py-3.5 rounded-xl focus:outline-none focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100 transition-all font-medium text-slate-800"
-                                    placeholder="you@company.com"
+                                    placeholder="dhaniyaa@email.com"
                                     required
                                 />
                             </div>

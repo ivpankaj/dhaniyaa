@@ -16,7 +16,7 @@ export default function AdrakChat() {
         {
             id: 'welcome',
             role: 'model',
-            text: "Hi! I'm Adrak using Gemini 2.0 Flash. How can I help you with your project today?"
+            text: "Hi! I'm Adrak, an AI for Dhaniyaa. How can I help you with your project today?"
         }
     ]);
     const [input, setInput] = useState('');

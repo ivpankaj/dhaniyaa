@@ -23,6 +23,12 @@ export default function ProjectBoardPage() {
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [selectedTicket, setSelectedTicket] = useState<any>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+    const handleRefresh = () => {
+        setRefreshTrigger(prev => prev + 1);
+    };
+
     const searchParams = useSearchParams();
     const ticketIdParam = searchParams.get('ticketId');
 
@@ -75,6 +81,7 @@ export default function ProjectBoardPage() {
             organizationId: project.organizationId,
             sprintId: selectedSprintId
         });
+        handleRefresh();
     };
 
     if (loading) return (
@@ -111,7 +118,7 @@ export default function ProjectBoardPage() {
                     </div>
                     <div>
                         <h1 className="text-sm font-bold tracking-tight">{project.name}</h1>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{project.key || 'Software Project'}</p>
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{project.type || 'SOFTWARE PROJECT'}</p>
                     </div>
                 </div>
 
@@ -228,27 +235,57 @@ export default function ProjectBoardPage() {
                         sprintId={selectedSprintId}
                         onTicketClick={(ticket) => router.push(`/projects/${params.id}?ticketId=${ticket._id}`)}
                         searchQuery={searchQuery}
+                        refreshTrigger={refreshTrigger}
                     />
                 ) : (
-                    <div className="h-full mx-4 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-300 rounded-2xl bg-white/50 mb-4">
-                        <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-4">
-                            <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
+                    <div className="h-full mx-4 border-2 border-dashed border-slate-200 rounded-2xl bg-white/50 mb-4 overflow-hidden relative text-slate-400">
+                        <div className="absolute inset-0 overflow-y-auto custom-scrollbar">
+                            <div className="min-h-full flex flex-col items-center justify-center p-4 md:p-8 pb-10">
+                                <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-3xl shadow-sm flex items-center justify-center mb-6 shrink-0 mt-8">
+                                    <svg className="w-8 h-8 md:w-10 md:h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-lg md:text-xl font-black text-slate-700 mb-2 text-center">Setup Your Workflow</h3>
+                                <p className="text-sm font-bold text-slate-400 mb-8 max-w-md text-center">
+                                    The board is currently empty. Follow these steps to activate your workspace and start creating tickets:
+                                </p>
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl mb-10 px-4">
+                                    <div className="flex flex-col items-center text-center p-6 bg-white rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md hover:-translate-y-1 group">
+                                        <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-black text-sm shrink-0 border border-blue-100 mb-4 group-hover:scale-110 transition-transform">1</div>
+                                        <span className="text-sm font-black text-slate-800 uppercase tracking-wide mb-2">Go to Planner</span>
+                                        <span className="text-xs font-bold text-slate-400 leading-relaxed">Navigate to the backlog view to manage your project tasks</span>
+                                    </div>
+                                    <div className="flex flex-col items-center text-center p-6 bg-white rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md hover:-translate-y-1 group">
+                                        <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-black text-sm shrink-0 border border-blue-100 mb-4 group-hover:scale-110 transition-transform">2</div>
+                                        <span className="text-sm font-black text-slate-800 uppercase tracking-wide mb-2">Create Cycle</span>
+                                        <span className="text-xs font-bold text-slate-400 leading-relaxed">Create a new sprint cycle and drag tickets into it</span>
+                                    </div>
+                                    <div className="flex flex-col items-center text-center p-6 bg-white rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md hover:-translate-y-1 group">
+                                        <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-black text-sm shrink-0 border border-blue-100 mb-4 group-hover:scale-110 transition-transform">3</div>
+                                        <span className="text-sm font-black text-slate-800 uppercase tracking-wide mb-2">Start Cycle</span>
+                                        <span className="text-xs font-bold text-slate-400 leading-relaxed">Activate the cycle to enable this board view</span>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={() => router.push(`/projects/${project._id}/backlog`)}
+                                    className="bg-primary text-white px-8 py-3.5 rounded-xl font-black text-sm shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                    Go to Planner
+                                </button>
+                            </div>
                         </div>
-                        <p className="font-bold text-sm mb-6">Start a cycle to enable the board view.</p>
-                        <button
-                            onClick={() => router.push(`/projects/${project._id}/backlog`)}
-                            className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:shadow-primary/30 transition-all"
-                        >
-                            Go to Planner
-                        </button>
                     </div>
                 )}
-            </main>
+            </main >
 
             {/* Modals */}
-            <CreateTicketModal
+            < CreateTicketModal
                 isOpen={isTicketModalOpen}
                 onClose={() => setIsTicketModalOpen(false)}
                 onCreate={handleCreateTicket}
@@ -265,6 +302,7 @@ export default function ProjectBoardPage() {
                 ticket={selectedTicket}
                 members={project.members || []}
                 projectId={params.id}
+                onUpdate={handleRefresh}
             />
 
             <InviteMemberModal
@@ -284,6 +322,6 @@ export default function ProjectBoardPage() {
                 projectId={params.id}
                 project={project}
             />
-        </div>
+        </div >
     );
 }

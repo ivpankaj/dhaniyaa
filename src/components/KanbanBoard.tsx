@@ -21,7 +21,7 @@ const columns = {
     'Done': { title: 'Done', items: [] as Ticket[] },
 };
 
-export default function KanbanBoard({ projectId, sprintId, onTicketClick, searchQuery }: { projectId: string; sprintId?: string | null; onTicketClick: (ticket: any) => void; searchQuery?: string }) {
+export default function KanbanBoard({ projectId, sprintId, onTicketClick, searchQuery, refreshTrigger }: { projectId: string; sprintId?: string | null; onTicketClick: (ticket: any) => void; searchQuery?: string; refreshTrigger?: number }) {
     const [boardData, setBoardData] = useState(columns);
     const [loading, setLoading] = useState(true);
     const socket = useSocket(projectId);
@@ -61,7 +61,7 @@ export default function KanbanBoard({ projectId, sprintId, onTicketClick, search
         };
 
         if (projectId) fetchTickets();
-    }, [projectId, sprintId]);
+    }, [projectId, sprintId, refreshTrigger]);
 
     useEffect(() => {
         if (!socket) return;

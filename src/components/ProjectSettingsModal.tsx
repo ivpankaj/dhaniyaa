@@ -30,6 +30,7 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({ isOp
     const [isEditing, setIsEditing] = useState(false);
     const [editedName, setEditedName] = useState('');
     const [editedKey, setEditedKey] = useState('');
+    const [editedType, setEditedType] = useState('Software Project');
     const [editedDescription, setEditedDescription] = useState('');
     const [saving, setSaving] = useState(false);
 
@@ -43,6 +44,7 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({ isOp
         if (project) {
             setEditedName(project.name || '');
             setEditedKey(project.key || 'TF');
+            setEditedType(project.type || 'Software Project');
             setEditedDescription(project.description || '');
         }
     }, [project]);
@@ -130,6 +132,7 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({ isOp
             await api.patch(`/api/projects/${projectId}`, {
                 name: editedName,
                 key: editedKey,
+                type: editedType,
                 description: editedDescription
             });
             toast.success('Project updated successfully!');
@@ -188,9 +191,10 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({ isOp
                                         <button
                                             onClick={() => {
                                                 if (isEditing) {
-                                                    setEditedName(project.name);
-                                                    setEditedKey(project.key);
-                                                    setEditedDescription(project.description);
+                                                    setEditedName(project.name || '');
+                                                    setEditedKey(project.key || 'TF');
+                                                    setEditedType(project.type || 'Software Project');
+                                                    setEditedDescription(project.description || '');
                                                 }
                                                 setIsEditing(!isEditing);
                                             }}
@@ -232,6 +236,34 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({ isOp
                                     ) : (
                                         <div className="px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-slate-800">
                                             {project?.key || 'TF'}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2">Project Type</label>
+                                    {isEditing ? (
+                                        <div className="relative">
+                                            <select
+                                                value={editedType}
+                                                onChange={(e) => setEditedType(e.target.value)}
+                                                className="w-full px-4 py-3 bg-white border-2 border-blue-200 focus:border-primary rounded-xl font-bold text-slate-800 outline-none transition-colors appearance-none cursor-pointer"
+                                            >
+                                                <option value="Software Project">Software Project</option>
+                                                <option value="Marketing Campaign">Marketing Campaign</option>
+                                                <option value="Business Project">Business Project</option>
+                                                <option value="Content Calendar">Content Calendar</option>
+                                                <option value="Personal Board">Personal Board</option>
+                                            </select>
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-slate-800">
+                                            {project?.type || 'Software Project'}
                                         </div>
                                     )}
                                 </div>
