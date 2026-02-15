@@ -54,7 +54,7 @@ export default function SetPasswordPage() {
 
             <div className="w-full max-w-[480px] bg-white p-10 md:p-12 rounded-[32px] shadow-2xl border border-slate-100 relative z-10 animate-in zoom-in-95 duration-500">
                 <div className="flex flex-col items-center mb-10 text-center">
-                    <div className="w-20 h-20 bg-gradient-to-br from-violet-600 to-emerald-500 rounded-[24px] flex items-center justify-center mb-8 shadow-xl shadow-violet-500/20 p-4 transform rotate-3 hover:rotate-0 transition-all duration-500">
+                    <div className="w-20 h-20  rounded-[24px] flex items-center justify-center mb-8 shadow-xl shadow-violet-500/20 p-4 transform rotate-3 hover:rotate-0 transition-all duration-500">
                         <DhaniyaaLogo className="w-full h-full text-white" />
                     </div>
                     <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-3">Welcome to Dhaniyaa!</h2>
