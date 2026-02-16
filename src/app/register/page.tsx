@@ -88,10 +88,11 @@ export default function RegisterPage() {
                 <div className="relative z-10 flex flex-col justify-center px-16 text-white">
                     <div className="mb-8">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-24 h-24 rounded-2xl flex items-center justify-center p-2">
-                                <DhaniyaaLogo className="w-full h-full" />
+                               <div className="w-30 h-30 rounded-2xl flex items-center justify-center p-2 ">
+                                <DhaniyaaLogo className="w-full h-full text-2xl" />
+                                <Link href="/" className="text-2xl font-bold">Dhaniyaa</Link>
                             </div>
-                            <h1 className="text-4xl font-black tracking-tight -ml-9">Dhaniyaa</h1>
+                          
                         </div>
                         <h2 className="text-5xl font-black leading-tight mb-6">
                             Start your journey<br />to better projects
