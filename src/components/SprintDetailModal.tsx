@@ -75,10 +75,10 @@ export default function SprintDetailModal({ isOpen, onClose, sprint }: SprintDet
                                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Total Issues</span>
                                 <span className="text-2xl sm:text-3xl font-black text-slate-800">{sprint.summary.totalTickets}</span>
                             </div>
-                            <div className="bg-green-50 border-2 border-green-100 p-4 sm:p-6 rounded-2xl shadow-sm text-center">
-                                <span className="text-[10px] font-black text-green-600/60 uppercase tracking-widest block mb-1">Completed</span>
-                                <span className="text-2xl sm:text-3xl font-black text-green-600">{sprint.summary.completedTickets}</span>
-                                <p className="text-[9px] font-black text-green-600/40 uppercase mt-1">
+                            <div className="bg-violet-50 border-2 border-violet-100 p-4 sm:p-6 rounded-2xl shadow-sm text-center">
+                                <span className="text-[10px] font-black text-violet-600/60 uppercase tracking-widest block mb-1">Completed</span>
+                                <span className="text-2xl sm:text-3xl font-black text-violet-600">{sprint.summary.completedTickets}</span>
+                                <p className="text-[9px] font-black text-violet-600/40 uppercase mt-1">
                                     {Math.round((sprint.summary.completedTickets / sprint.summary.totalTickets) * 100) || 0}% Success
                                 </p>
                             </div>
@@ -94,7 +94,7 @@ export default function SprintDetailModal({ isOpen, onClose, sprint }: SprintDet
                         {/* Completed Tickets */}
                         <div className="space-y-4">
                             <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                                <span className="w-2 h-2 rounded-full bg-violet-500"></span>
                                 Completed Work ({completed.length})
                             </h3>
                             <div className="space-y-2">
@@ -106,7 +106,7 @@ export default function SprintDetailModal({ isOpen, onClose, sprint }: SprintDet
                                     completed.map(ticket => (
                                         <div key={ticket._id} className="p-3 bg-white border border-slate-100 rounded-xl flex items-center justify-between shadow-sm">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-1 h-4 bg-green-500 rounded-full" />
+                                                <div className="w-1 h-4 bg-violet-500 rounded-full" />
                                                 <span className="text-sm font-bold text-slate-700">{ticket.title}</span>
                                             </div>
                                             <span className="text-[9px] font-bold text-slate-300">#{ticket._id.slice(-4)}</span>

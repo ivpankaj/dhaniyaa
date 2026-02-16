@@ -6,13 +6,15 @@ import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import Image from 'next/image';
 import DhaniyaaLogo from '@/components/DhaniyaaLogo';
-import CreateProjectModal from '@/components/CreateProjectModal';
-import NotificationDropdown from '@/components/NotificationDropdown';
-import CreateOrganizationModal from '@/components/CreateOrganizationModal';
-import { InviteMemberModal } from '@/components/InviteMemberModal';
-import { SettingsModal } from '@/components/SettingsModal';
-import { ConfirmationModal } from '@/components/ConfirmationModal';
-import AdrakChat from '@/components/AdrakChat';
+import dynamic from 'next/dynamic';
+
+const CreateProjectModal = dynamic(() => import('@/components/CreateProjectModal'), { ssr: false });
+const NotificationDropdown = dynamic(() => import('@/components/NotificationDropdown'), { ssr: false });
+const CreateOrganizationModal = dynamic(() => import('@/components/CreateOrganizationModal'), { ssr: false });
+const InviteMemberModal = dynamic(() => import('@/components/InviteMemberModal').then(mod => mod.InviteMemberModal), { ssr: false });
+const SettingsModal = dynamic(() => import('@/components/SettingsModal').then(mod => mod.SettingsModal), { ssr: false });
+const ConfirmationModal = dynamic(() => import('@/components/ConfirmationModal').then(mod => mod.ConfirmationModal), { ssr: false });
+const AdrakChat = dynamic(() => import('@/components/AdrakChat'), { ssr: false });
 
 import { toast } from 'sonner';
 
@@ -25,6 +27,8 @@ export default function DashboardPage() {
         title: string;
         message: string;
         onConfirm: () => void;
+        variant?: 'danger' | 'warning' | 'info';
+        confirmText?: string;
     }>({
         isOpen: false,
         title: '',
@@ -77,6 +81,18 @@ export default function DashboardPage() {
         });
     };
 
+    const handleLogoutClick = () => {
+        setConfirmationModal({
+            isOpen: true,
+            title: 'Logout Confirmation',
+            message: 'Are you sure you want to log out of Dhaniyaa? You will need to sign in again to access your workspace.',
+            variant: 'danger',
+            confirmText: 'Logout',
+            onConfirm: () => {
+                logout();
+            }
+        });
+    };
 
     const router = useRouter();
     const [orgs, setOrgs] = useState<any[]>([]);
@@ -315,7 +331,7 @@ export default function DashboardPage() {
                         </svg>
                         Settings
                     </button>
-                    <button onClick={logout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded text-sm font-bold hover:bg-red-500/20 text-red-100/70 hover:text-white transition-all group">
+                    <button onClick={handleLogoutClick} className="w-full flex items-center gap-3 px-3 py-2.5 rounded text-sm font-bold hover:bg-red-500/20 text-red-100/70 hover:text-white transition-all group">
                         <svg className="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
@@ -466,7 +482,7 @@ export default function DashboardPage() {
                                                         </div>
                                                         <div className="flex flex-col items-end">
                                                             <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">Key: {project.key || 'TF'}</span>
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></span>
                                                         </div>
                                                     </div>
                                                     <h4 className="text-xl font-extrabold mb-3 group-hover:text-primary transition-colors tracking-tight">{project.name}</h4>
@@ -602,6 +618,8 @@ export default function DashboardPage() {
                     onConfirm={confirmationModal.onConfirm}
                     title={confirmationModal.title}
                     message={confirmationModal.message}
+                    variant={confirmationModal.variant}
+                    confirmText={confirmationModal.confirmText}
                 />
 
                 {/* Adrak AI Chat Widget */}

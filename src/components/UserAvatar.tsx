@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 interface UserAvatarProps {
     name: string;
@@ -23,18 +24,21 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({ name, avatar, size = 'md
     // Show initial if no avatar, or if image failed to load
     if (!avatar || imageError) {
         return (
-            <div className={`${sizeClasses[size]} bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center text-primary font-bold flex-shrink-0 ${className}`}>
+            <div className={`${sizeClasses[size]} bg-indigo-100 rounded-full flex items-center justify-center text-primary font-bold flex-shrink-0 ${className}`}>
                 {initial}
             </div>
         );
     }
 
     return (
-        <img
-            src={avatar}
-            alt={name}
-            className={`${sizeClasses[size]} rounded-full object-cover flex-shrink-0 ${className}`}
-            onError={() => setImageError(true)}
-        />
+        <div className={`${sizeClasses[size]} relative flex-shrink-0 ${className}`}>
+            <Image
+                src={avatar}
+                alt={name}
+                fill
+                className="rounded-full object-cover"
+                onError={() => setImageError(true)}
+            />
+        </div>
     );
 };

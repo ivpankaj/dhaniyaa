@@ -457,7 +457,7 @@ export default function TicketDetailModal({ isOpen, onClose, ticket, members, pr
                                         <select
                                             value={status}
                                             onChange={(e) => handleStatusChange(e.target.value)}
-                                            className={`w-full appearance-none px-4 py-3.5 rounded-2xl font-black text-xs tracking-tight border-2 transition-all cursor-pointer ${status === 'Done' ? 'bg-green-50 border-green-200 text-green-700' :
+                                            className={`w-full appearance-none px-4 py-3.5 rounded-2xl font-black text-xs tracking-tight border-2 transition-all cursor-pointer ${status === 'Done' ? 'bg-violet-50 border-violet-200 text-violet-700' :
                                                 status === 'In Progress' ? 'bg-blue-50 border-blue-200 text-blue-700' :
                                                     'bg-white border-slate-100 text-slate-700 hover:border-slate-200 shadow-sm'
                                                 }`}

@@ -14,7 +14,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 <ProtectedRoute>
                     {children}
                 </ProtectedRoute>
-                <Toaster position="top-right" richColors />
+                <Toaster position="bottom-right" richColors />
             </AuthProvider>
         </Provider>
     );

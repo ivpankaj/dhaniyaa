@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
             <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
                 <div className="p-8 sm:p-10">
                     <div className="flex justify-center mb-8">
-                        <div className="w-16 h-16 bg-gradient-to-br from-violet-600 to-emerald-500 rounded-2xl flex items-center justify-center p-3 shadow-lg shadow-violet-500/20">
+                        <div className="w-16 h-16 bg-[#0d1117] rounded-2xl flex items-center justify-center p-3 shadow-lg">
                             <DhaniyaaLogo className="w-full h-full text-white" />
                         </div>
                     </div>
@@ -41,18 +41,18 @@ export default function ForgotPasswordPage() {
                     </p>
 
                     {status === 'success' ? (
-                        <div className="bg-green-50 border-2 border-green-100 rounded-2xl p-6 text-center animate-in zoom-in duration-300">
-                            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="bg-violet-50 border-2 border-violet-100 rounded-2xl p-6 text-center animate-in zoom-in duration-300">
+                            <div className="w-12 h-12 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <CheckCircle2 className="w-6 h-6" />
                             </div>
-                            <h3 className="text-lg font-bold text-green-800 mb-2">Check your email</h3>
-                            <p className="text-green-700 font-medium text-sm">
+                            <h3 className="text-lg font-bold text-violet-800 mb-2">Check your email</h3>
+                            <p className="text-violet-700 font-medium text-sm">
                                 We sent a password reset link to <span className="font-bold">{email}</span>
                             </p>
                             <div className="mt-6">
                                 <Link
                                     href="/login"
-                                    className="inline-flex items-center justify-center gap-2 text-green-700 font-bold hover:text-green-800 transition-colors"
+                                    className="inline-flex items-center justify-center gap-2 text-violet-700 font-bold hover:text-violet-800 transition-colors"
                                 >
                                     <ArrowLeft className="w-4 h-4" />
                                     Back to login
@@ -88,7 +88,7 @@ export default function ForgotPasswordPage() {
                             <button
                                 type="submit"
                                 disabled={status === 'loading'}
-                                className="w-full bg-gradient-to-r from-violet-600 to-emerald-500 text-white py-4 rounded-xl font-bold text-base hover:shadow-lg hover:shadow-emerald-500/30 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full bg-violet-600 text-white py-4 rounded-xl font-bold text-base hover:bg-violet-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-violet-600/20"
                             >
                                 {status === 'loading' ? (
                                     <span className="flex items-center justify-center gap-2">

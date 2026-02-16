@@ -68,7 +68,7 @@ function ResetPasswordForm() {
     return (
         <div className="p-8 sm:p-10 w-full">
             <div className="flex justify-center mb-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-violet-600 to-emerald-500 rounded-2xl flex items-center justify-center p-3 shadow-lg shadow-violet-500/20">
+                <div className="w-16 h-16 bg-[#0d1117] rounded-2xl flex items-center justify-center p-3 shadow-lg">
                     <DhaniyaaLogo className="w-full h-full text-white" />
                 </div>
             </div>
@@ -79,17 +79,17 @@ function ResetPasswordForm() {
             </p>
 
             {status === 'success' ? (
-                <div className="bg-green-50 border-2 border-green-100 rounded-2xl p-8 text-center animate-in zoom-in duration-300">
-                    <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <div className="bg-violet-50 border-2 border-violet-100 rounded-2xl p-8 text-center animate-in zoom-in duration-300">
+                    <div className="w-16 h-16 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
                         <CheckCircle2 className="w-8 h-8" />
                     </div>
-                    <h3 className="text-xl font-bold text-green-800 mb-2">Password Reset Successful!</h3>
-                    <p className="text-green-700 font-medium mb-6">
+                    <h3 className="text-xl font-bold text-violet-800 mb-2">Password Reset Successful!</h3>
+                    <p className="text-violet-700 font-medium mb-6">
                         Your password has been securely updated. Redirecting you to login...
                     </p>
                     <Link
                         href="/login"
-                        className="inline-flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-700 transition-all shadow-lg shadow-green-600/20"
+                        className="inline-flex items-center justify-center gap-2 bg-violet-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-violet-700 transition-all shadow-lg shadow-violet-600/20"
                     >
                         Login Now
                         <ArrowRight className="w-4 h-4" />
@@ -146,7 +146,7 @@ function ResetPasswordForm() {
                     <button
                         type="submit"
                         disabled={status === 'loading'}
-                        className="w-full bg-gradient-to-r from-violet-600 to-emerald-500 text-white py-4 rounded-xl font-bold text-base hover:shadow-lg hover:shadow-emerald-500/30 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-violet-600 text-white py-4 rounded-xl font-bold text-base hover:bg-violet-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-violet-600/20"
                     >
                         {status === 'loading' ? (
                             <span className="flex items-center justify-center gap-2">

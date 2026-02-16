@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import KanbanBoard from '@/components/KanbanBoard';
 import api from '@/lib/api';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import CreateTicketModal from '@/components/CreateTicketModal';
-import TicketDetailModal from '@/components/TicketDetailModal';
-import { InviteMemberModal } from '@/components/InviteMemberModal';
 import { useAuth } from '@/context/AuthContext';
-import { ProjectSettingsModal } from '@/components/ProjectSettingsModal';
+import dynamic from 'next/dynamic';
+
+const CreateTicketModal = dynamic(() => import('@/components/CreateTicketModal'), { ssr: false });
+const TicketDetailModal = dynamic(() => import('@/components/TicketDetailModal'), { ssr: false });
+const InviteMemberModal = dynamic(() => import('@/components/InviteMemberModal').then(mod => mod.InviteMemberModal), { ssr: false });
+const ProjectSettingsModal = dynamic(() => import('@/components/ProjectSettingsModal').then(mod => mod.ProjectSettingsModal), { ssr: false });
 
 export default function ProjectBoardPage() {
     const { user } = useAuth();

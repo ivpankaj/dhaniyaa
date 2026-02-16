@@ -49,7 +49,7 @@ export default function SetPasswordPage() {
             {/* Background elements */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-500/10 rounded-full blur-3xl animate-pulse"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-500/10 rounded-full blur-3xl animate-pulse delay-700"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-violet-600/10 rounded-full blur-3xl animate-pulse delay-700"></div>
             </div>
 
             <div className="w-full max-w-[480px] bg-white p-10 md:p-12 rounded-[32px] shadow-2xl border border-slate-100 relative z-10 animate-in zoom-in-95 duration-500">
@@ -114,7 +114,7 @@ export default function SetPasswordPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-gradient-to-r from-violet-600 to-emerald-500 text-white py-5 rounded-2xl font-black text-lg hover:shadow-2xl hover:shadow-emerald-500/30 active:scale-95 transition-all shadow-xl shadow-violet-500/10 disabled:opacity-50 mt-4"
+                        className="w-full bg-violet-600 text-white py-5 rounded-2xl font-black text-lg hover:bg-violet-700 active:scale-95 transition-all shadow-xl shadow-violet-600/20 disabled:opacity-50 mt-4"
                     >
                         {loading ? 'Setting Password...' : 'Set Password & Continue'}
                     </button>

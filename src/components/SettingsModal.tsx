@@ -110,7 +110,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                     </div>
                                     <div>
                                         <label className="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2">Organization Role</label>
-                                        <div className="inline-block px-4 py-1.5 bg-green-50 text-green-600 rounded-full font-bold text-[10px] uppercase border border-green-100">
+                                        <div className="inline-block px-4 py-1.5 bg-violet-50 text-violet-600 rounded-full font-bold text-[10px] uppercase border border-violet-100">
                                             Administrator
                                         </div>
                                     </div>

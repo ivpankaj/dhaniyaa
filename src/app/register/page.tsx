@@ -76,11 +76,11 @@ export default function RegisterPage() {
     return (
         <div className="flex min-h-screen">
             {/* Left Side - Branding */}
-            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-violet-600 via-emerald-500 to-violet-500 relative overflow-hidden">
+            <div className="hidden lg:flex lg:w-1/2 bg-[#0d1117] relative overflow-hidden text-white">
                 {/* Animated background shapes */}
                 <div className="absolute inset-0 opacity-20">
                     <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full mix-blend-overlay filter blur-3xl animate-blob"></div>
-                    <div className="absolute top-40 right-20 w-72 h-72 bg-emerald-300 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-2000"></div>
+                    <div className="absolute top-40 right-20 w-72 h-72 bg-violet-300 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-2000"></div>
                     <div className="absolute bottom-20 left-40 w-72 h-72 bg-purple-300 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-4000"></div>
                 </div>
 
@@ -210,18 +210,18 @@ export default function RegisterPage() {
                                                             ? 'bg-red-500'
                                                             : passwordStrength === 3
                                                                 ? 'bg-yellow-500'
-                                                                : 'bg-green-500'
+                                                                : 'bg-violet-500'
                                                         : 'bg-slate-200'
                                                         }`}
                                                 />
                                             ))}
                                         </div>
                                         <div className="space-y-1 text-xs">
-                                            <div className={`flex items-center gap-1.5 ${passwordChecks.length ? 'text-green-600' : 'text-slate-400'}`}>
+                                            <div className={`flex items-center gap-1.5 ${passwordChecks.length ? 'text-violet-600' : 'text-slate-400'}`}>
                                                 {passwordChecks.length ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
                                                 <span className="font-medium">At least 8 characters</span>
                                             </div>
-                                            <div className={`flex items-center gap-1.5 ${passwordChecks.number ? 'text-green-600' : 'text-slate-400'}`}>
+                                            <div className={`flex items-center gap-1.5 ${passwordChecks.number ? 'text-violet-600' : 'text-slate-400'}`}>
                                                 {passwordChecks.number ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
                                                 <span className="font-medium">Contains a number</span>
                                             </div>
@@ -233,7 +233,7 @@ export default function RegisterPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-gradient-to-r from-violet-600 to-emerald-500 text-white py-4 rounded-xl font-bold text-base hover:shadow-2xl hover:shadow-emerald-500/30 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none mt-6"
+                                className="w-full bg-violet-600 text-white py-4 rounded-xl font-bold text-base hover:bg-violet-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6 shadow-lg shadow-violet-600/20"
                             >
                                 {loading ? (
                                     <span className="flex items-center justify-center gap-2">

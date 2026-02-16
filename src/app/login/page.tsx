@@ -65,12 +65,12 @@ export default function LoginPage() {
     return (
         <div className="flex min-h-screen">
             {/* Left Side - Branding */}
-            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-violet-600 via-violet-500 to-emerald-500 relative overflow-hidden">
+            <div className="hidden lg:flex lg:w-1/2 bg-[#0d1117] relative overflow-hidden text-white">
                 {/* Animated background shapes */}
                 <div className="absolute inset-0 opacity-20">
                     <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full mix-blend-overlay filter blur-3xl animate-blob"></div>
                     <div className="absolute top-40 right-20 w-72 h-72 bg-purple-300 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-2000"></div>
-                    <div className="absolute bottom-20 left-40 w-72 h-72 bg-emerald-300 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-4000"></div>
+                    <div className="absolute bottom-20 left-40 w-72 h-72 bg-violet-300 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-4000"></div>
                 </div>
 
                 {/* Content */}
@@ -184,7 +184,7 @@ export default function LoginPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-gradient-to-r from-violet-600 to-emerald-500 text-white py-4 rounded-xl font-bold text-base hover:shadow-2xl hover:shadow-emerald-500/30 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
+                                className="w-full bg-violet-600 text-white py-4 rounded-xl font-bold text-base hover:bg-violet-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6 shadow-lg shadow-violet-600/20"
                             >
                                 {loading ? (
                                     <span className="flex items-center justify-center gap-2">

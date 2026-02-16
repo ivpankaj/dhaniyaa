@@ -152,7 +152,7 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({ isOp
     return (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[250] p-2 sm:p-4 animate-in fade-in duration-200">
             <div className="bg-white rounded-2xl sm:rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] animate-in zoom-in-95 duration-200">
-                <div className="px-4 sm:px-8 py-4 sm:py-6 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-slate-50 to-blue-50/30">
+                <div className="px-4 sm:px-8 py-4 sm:py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                     <div className="min-w-0 flex-1 mr-2">
                         <h2 className="text-base sm:text-xl font-black text-slate-800 tracking-tight truncate">Project Settings</h2>
                         <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 truncate">{project?.name}</p>
@@ -299,7 +299,7 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({ isOp
                             <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
                                 {/* Invite Member Section */}
                                 {isAdmin && (
-                                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-100 rounded-xl p-4 sm:p-5">
+                                    <div className="bg-blue-50/50 border-2 border-blue-100 rounded-xl p-4 sm:p-5">
                                         <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
                                             <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

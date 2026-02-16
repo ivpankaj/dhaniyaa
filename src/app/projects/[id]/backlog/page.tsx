@@ -263,7 +263,7 @@ export default function BacklogPage() {
                                                         {sprint.status === 'ACTIVE' && (
                                                             <Button
                                                                 size="sm"
-                                                                className="bg-green-600 hover:bg-green-700 text-white transition-all font-bold text-[10px] md:text-xs px-3 md:px-4 h-8"
+                                                                className="bg-violet-600 hover:bg-violet-700 text-white transition-all font-bold text-[10px] md:text-xs px-3 md:px-4 h-8"
                                                                 onClick={() => handleCompleteSprint(sprint._id)}
                                                             >
                                                                 Complete Cycle
@@ -300,7 +300,7 @@ export default function BacklogPage() {
                                                                                 {(ticket.assignee.name || '?').charAt(0).toUpperCase()}
                                                                             </div>
                                                                         )}
-                                                                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter hidden sm:inline-block ${ticket.status === 'Done' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>{ticket.status}</span>
+                                                                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter hidden sm:inline-block ${ticket.status === 'Done' ? 'bg-violet-100 text-violet-700' : 'bg-slate-100 text-slate-500'}`}>{ticket.status}</span>
                                                                         <span className="text-[9px] font-bold text-slate-300 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">#{ticket._id.slice(-4)}</span>
                                                                     </div>
                                                                 </div>

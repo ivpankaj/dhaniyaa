@@ -68,26 +68,40 @@ export default function KanbanBoard({ projectId, sprintId, onTicketClick, search
 
         socket.on('ticket_created', (ticket: Ticket) => {
             setBoardData(prev => {
-                const newBoard = { ...prev };
-                if (newBoard[ticket.status as keyof typeof columns]) {
-                    newBoard[ticket.status as keyof typeof columns].items.push(ticket);
-                }
-                return JSON.parse(JSON.stringify(newBoard));
+                const columnId = ticket.status as keyof typeof columns;
+                if (!prev[columnId]) return prev;
+                return {
+                    ...prev,
+                    [columnId]: {
+                        ...prev[columnId],
+                        items: [...prev[columnId].items, ticket]
+                    }
+                };
             });
         });
 
         socket.on('ticket_updated', (updatedTicket: Ticket) => {
             setBoardData(prev => {
                 const newBoard = { ...prev };
+                // Remove from all potential columns
                 Object.keys(newBoard).forEach(key => {
-                    newBoard[key as keyof typeof columns].items = newBoard[key as keyof typeof columns].items.filter(t => t._id !== updatedTicket._id);
+                    const colKey = key as keyof typeof columns;
+                    newBoard[colKey] = {
+                        ...newBoard[colKey],
+                        items: newBoard[colKey].items.filter(t => t._id !== updatedTicket._id)
+                    };
                 });
 
-                if (newBoard[updatedTicket.status as keyof typeof columns]) {
-                    newBoard[updatedTicket.status as keyof typeof columns].items.push(updatedTicket);
+                // Add to new status column
+                const newStatusKey = updatedTicket.status as keyof typeof columns;
+                if (newBoard[newStatusKey]) {
+                    newBoard[newStatusKey] = {
+                        ...newBoard[newStatusKey],
+                        items: [...newBoard[newStatusKey].items, updatedTicket]
+                    };
                 }
 
-                return JSON.parse(JSON.stringify(newBoard));
+                return newBoard;
             });
         });
 
@@ -204,7 +218,7 @@ export default function KanbanBoard({ projectId, sprintId, onTicketClick, search
         switch (p) {
             case 'High': return 'text-red-600 bg-red-100';
             case 'Critical': return 'text-white bg-red-600';
-            case 'Low': return 'text-green-600 bg-green-100';
+            case 'Low': return 'text-violet-600 bg-violet-100';
             default: return 'text-blue-600 bg-blue-100';
         }
     };
@@ -212,7 +226,7 @@ export default function KanbanBoard({ projectId, sprintId, onTicketClick, search
     const getTypeIcon = (type: string) => {
         switch (type) {
             case 'Bug': return <span className="text-xs bg-red-500 text-white p-0.5 rounded shadow-sm">B</span>;
-            case 'Story': return <span className="text-xs bg-green-500 text-white p-0.5 rounded shadow-sm">S</span>;
+            case 'Story': return <span className="text-xs bg-violet-500 text-white p-0.5 rounded shadow-sm">S</span>;
             default: return <span className="text-xs bg-blue-500 text-white p-0.5 rounded shadow-sm">T</span>;
         }
     }
@@ -256,7 +270,7 @@ export default function KanbanBoard({ projectId, sprintId, onTicketClick, search
                             <h3 className="text-[12px] font-black tracking-[0.2em] uppercase text-slate-800 flex items-center gap-2">
                                 <span className={`w-2 h-2 rounded-full ${columnId === 'To Do' ? 'bg-slate-300' :
                                     columnId === 'In Progress' ? 'bg-blue-500' :
-                                        columnId === 'In Review' ? 'bg-purple-500' : 'bg-green-500'
+                                        columnId === 'In Review' ? 'bg-purple-500' : 'bg-violet-500'
                                     } shadow-sm`} />
                                 {column.title}
                             </h3>

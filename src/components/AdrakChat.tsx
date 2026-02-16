@@ -83,7 +83,7 @@ export default function AdrakChat() {
                             <div>
                                 <h3 className="font-bold text-sm tracking-tight leading-none">Adrak AI</h3>
                                 <div className="flex items-center gap-1.5 mt-0.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse"></span>
                                     <p className="text-[10px] font-medium opacity-80">Online</p>
                                 </div>
                             </div>

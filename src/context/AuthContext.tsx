@@ -30,38 +30,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const token = localStorage.getItem('token');
             const storedUser = localStorage.getItem('user');
 
+            // Optimistically set user from localStorage to avoid flicker/blank screen
+            if (storedUser) {
+                try {
+                    setUser(JSON.parse(storedUser));
+                } catch (e) {
+                    console.error('Failed to parse stored user');
+                }
+            }
+
             if (token) {
                 try {
-                    // Try to fetch fresh user data
+                    // Revalidate with server
                     const res = await api.get('/api/auth/me');
                     const freshUser = res.data.data;
                     setUser(freshUser);
                     localStorage.setItem('user', JSON.stringify(freshUser));
                 } catch (err: any) {
-                    // If unauthorized, clear everything and redirect to login
                     if (err.response?.status === 401) {
-                        console.log('Session expired or invalid, redirecting to login...');
                         localStorage.removeItem('token');
                         localStorage.removeItem('user');
                         setUser(null);
                         router.push('/login');
-                    } else {
-                        console.error('Failed to fetch user', err);
-                        // For other errors (network, server), we might want to keep the local user state
-                        // or handle it differently.
-                        if (storedUser) {
-                            setUser(JSON.parse(storedUser));
-                        } else {
-                            localStorage.removeItem('token');
-                        }
+                    } else if (!storedUser) {
+                        // Only clear if we don't even have a stale user
+                        localStorage.removeItem('token');
+                        setUser(null);
                     }
                 }
+            } else {
+                setUser(null);
             }
             setLoading(false);
         };
 
         checkAuth();
-    }, []);
+    }, [router]);
 
     const login = (token: string, userData: any) => {
         localStorage.setItem('token', token);
