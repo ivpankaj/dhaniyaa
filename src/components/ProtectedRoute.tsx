@@ -3,6 +3,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
+import LandingPage from './landing/LandingPage';
 
 const protectedRoutes = ['/dashboard', '/organization', '/project', '/tickets'];
 
@@ -18,7 +19,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     }, [user, loading, router, pathname]);
 
     if (loading) {
-        return <div className="flex justify-center items-center h-screen text-white">Loading...</div>;
+        return <LandingPage/>
     }
 
     // If user is not authenticated and on a protected route, we return null (effect handles redirect)
