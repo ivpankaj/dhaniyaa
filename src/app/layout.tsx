@@ -81,12 +81,24 @@ export default function RootLayout({
                     src="https://www.googletagmanager.com/gtag/js?id=G-MXEHR6PTE1"
                     strategy="afterInteractive"
                 />
-                <Script id="google-analytics" strategy="afterInteractive">
+                <Script id="google-analytics-1" strategy="afterInteractive">
                     {`
                         window.dataLayer = window.dataLayer || [];
                         function gtag(){dataLayer.push(arguments);}
                         gtag('js', new Date());
                         gtag('config', 'G-MXEHR6PTE1');
+                    `}
+                </Script>
+                <Script
+                    src="https://www.googletagmanager.com/gtag/js?id=G-SJG00QBYSC"
+                    strategy="afterInteractive"
+                />
+                <Script id="google-analytics-2" strategy="afterInteractive">
+                    {`
+                        window.dataLayer = window.dataLayer || [];
+                        function gtag(){dataLayer.push(arguments);}
+                        gtag('js', new Date());
+                        gtag('config', 'G-SJG00QBYSC');
                     `}
                 </Script>
                 <Providers>{children}</Providers>
