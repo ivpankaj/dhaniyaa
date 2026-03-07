@@ -82,6 +82,7 @@ Dhaniyaa is a product by **CookMyTech**. Visit us at [cookmytech.site](https://c
    NEXT_PUBLIC_FIREBASE_APP_ID=...
    NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=...
    ```
+   `NEXT_PUBLIC_API_URL` should be the backend origin. Dhaniyaa frontend requests are routed to `/api/apps/dhaniyaa` automatically.
 
 4. **Start the development server**:
    ```bash
